@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/supabase';
 
 export interface Product {
   id: string;
@@ -8,9 +8,6 @@ export interface Product {
   precioCompra: number;
   precioVenta: number;
   stock: number;
-
-  esCanjeable?: boolean;
-  puntosRequeridos?: number;
 }
 
 interface ProductContextType {
@@ -29,168 +26,129 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [productos, setProductos] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ==========================
+  // =========================
   // 🔄 CARGAR PRODUCTOS
-  // ==========================
+  // =========================
+  const fetchProductos = async () => {
+    const { data, error } = await supabase
+      .from('products') // 👈 SOLO UNA TABLA
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setProductos(
+        data.map((p: any) => ({
+          id: p.id,
+          nombre: p.nombre,
+          categoria: p.categoria,
+          precioCompra: p.precio_compra,
+          precioVenta: p.precio_venta,
+          stock: p.stock,
+        }))
+      );
+    }
+  };
+
   useEffect(() => {
-    const loadProductos = async () => {
-      try {
-        const savedProductos = await AsyncStorage.getItem('productos');
-        if (savedProductos) {
-          const parsed = JSON.parse(savedProductos);
+    fetchProductos();
 
-          // ✅ asegurar compatibilidad con productos antiguos
-          const productosNormalizados = parsed.map((p: Product) => ({
-            ...p,
-            esCanjeable: p.esCanjeable || false,
-            puntosRequeridos: p.puntosRequeridos || 0,
-          }));
+    const channel = supabase
+      .channel('products-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        () => fetchProductos()
+      )
+      .subscribe();
 
-          setProductos(productosNormalizados);
-        } else {
-          const productosDemo: Product[] = [
-            {
-              id: '1',
-              nombre: 'Arroz Premium',
-              categoria: 'Alimentos',
-              precioCompra: 15,
-              precioVenta: 20,
-              stock: 50,
-              esCanjeable: false,
-            },
-            {
-              id: '2',
-              nombre: 'Frijoles Negros',
-              categoria: 'Alimentos',
-              precioCompra: 12,
-              precioVenta: 18,
-              stock: 35,
-              esCanjeable: false,
-            },
-            {
-              id: '3',
-              nombre: 'Leche Descremada',
-              categoria: 'Bebidas',
-              precioCompra: 8,
-              precioVenta: 12,
-              stock: 40,
-              esCanjeable: true,
-              puntosRequeridos: 15,
-            },
-          ];
-
-          setProductos(productosDemo);
-          await AsyncStorage.setItem('productos', JSON.stringify(productosDemo));
-        }
-      } catch (error) {
-        console.error('Error cargando productos:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      supabase.removeChannel(channel);
     };
-
-    loadProductos();
   }, []);
 
-  // ==========================
-  // ➕ AGREGAR PRODUCTO
-  // ==========================
-const agregarProducto = async (producto: Omit<Product, 'id'>) => {
-  try {
-    // 🔥 VALIDACIÓN
-    const existe = productos.find(
-      (p) => p.nombre.toLowerCase() === producto.nombre.toLowerCase()
-    );
+  // =========================
+  // ➕ AGREGAR
+  // =========================
+  const agregarProducto = async (producto: Omit<Product, 'id'>) => {
+    const { error } = await supabase.from('products').insert([
+      {
+        nombre: producto.nombre,
+        categoria: producto.categoria,
+        precio_compra: producto.precioCompra,
+        precio_venta: producto.precioVenta,
+        stock: producto.stock,
+      },
+    ]);
 
-    if (existe) {
-      throw new Error('El producto ya existe');
-    }
-
-    const nuevoProducto: Product = {
-      ...producto,
-      id: Math.random().toString(36).substr(2, 9),
-      esCanjeable: producto.esCanjeable || false,
-      puntosRequeridos: producto.puntosRequeridos || 0,
-    };
-
-    const productosActualizados = [...productos, nuevoProducto];
-
-    setProductos(productosActualizados);
-    await AsyncStorage.setItem('productos', JSON.stringify(productosActualizados));
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
-
-  // ==========================
-  // ✏️ ACTUALIZAR PRODUCTO
-  // ==========================
-  const actualizarProducto = async (id: string, productoActualizado: Partial<Product>) => {
-    try {
-      const productosActualizados = productos.map((p) =>
-        p.id === id ? { ...p, ...productoActualizado } : p
-      );
-
-      setProductos(productosActualizados);
-      await AsyncStorage.setItem('productos', JSON.stringify(productosActualizados));
-    } catch (error) {
-      console.error('Error actualizando producto:', error);
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // ==========================
+  // =========================
+  // ✏️ ACTUALIZAR
+  // =========================
+  const actualizarProducto = async (id: string, producto: Partial<Product>) => {
+    const { error } = await supabase
+      .from('products')
+      .update({
+        nombre: producto.nombre,
+        categoria: producto.categoria,
+        precio_compra: producto.precioCompra,
+        precio_venta: producto.precioVenta,
+        stock: producto.stock,
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  };
+
+  // =========================
   // ❌ ELIMINAR
-  // ==========================
+  // =========================
   const eliminarProducto = async (id: string) => {
-    try {
-      const productosActualizados = productos.filter((p) => p.id !== id);
-      setProductos(productosActualizados);
-      await AsyncStorage.setItem('productos', JSON.stringify(productosActualizados));
-    } catch (error) {
-      console.error('Error eliminando producto:', error);
-      throw error;
-    }
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   };
 
-  // ==========================
-  // 🔍 OBTENER
-  // ==========================
-  const obtenerProducto = (id: string) => {
-    return productos.find((p) => p.id === id);
-  };
-
-  // ==========================
+  // =========================
   // 📉 STOCK
-  // ==========================
+  // =========================
   const reducirStock = async (id: string, cantidad: number) => {
     const producto = productos.find((p) => p.id === id);
+    if (!producto) return;
 
-    if (producto && producto.stock >= cantidad) {
-      await actualizarProducto(id, {
-        stock: producto.stock - cantidad,
-      });
-    }
+    const nuevoStock = producto.stock - cantidad;
+
+    const { error } = await supabase
+      .from('products')
+      .update({ stock: nuevoStock })
+      .eq('id', id);
+
+    if (error) throw error;
   };
 
-  const value: ProductContextType = {
-    productos,
-    agregarProducto,
-    actualizarProducto,
-    eliminarProducto,
-    obtenerProducto,
-    reducirStock,
-    isLoading,
-  };
-
-  return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
+  return (
+    <ProductContext.Provider
+      value={{
+        productos,
+        agregarProducto,
+        actualizarProducto,
+        eliminarProducto,
+        obtenerProducto: (id) => productos.find(p => p.id === id),
+        reducirStock,
+        isLoading,
+      }}
+    >
+      {children}
+    </ProductContext.Provider>
+  );
 };
 
 export const useProducts = () => {
-  const context = useContext(ProductContext);
-  if (!context) {
-    throw new Error('useProducts debe usarse dentro de ProductProvider');
-  }
-  return context;
+  const ctx = useContext(ProductContext);
+  if (!ctx) throw new Error('useProducts must be used within ProductProvider');
+  return ctx;
 };

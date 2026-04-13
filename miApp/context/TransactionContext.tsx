@@ -1,106 +1,114 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/supabase';
 import { CartItem } from './CartContext';
 
 export interface Transaction {
   id: string;
-  usuarioId: string;
-  usuarioNombre: string;
+  user_id: string;
+  usuario_nombre: string;
   items: CartItem[];
   total: number;
-  fecha: string;
-  estado: 'completada' | 'pendiente';
+  created_at: string;
 }
 
 interface TransactionContextType {
-  transacciones: Transaction[];
-  registrarTransaccion: (usuarioId: string, usuarioNombre: string, items: CartItem[], total: number) => Promise<void>;
-  obtenerTransaccionesUsuario: (usuarioId: string) => Transaction[];
-  obtenerTodasTransacciones: () => Transaction[];
-  isLoading: boolean;
-}
-
-export const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
-
-export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [transacciones, setTransacciones] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Cargar transacciones al iniciar
-  useEffect(() => {
-    const loadTransacciones = async () => {
-      try {
-        const savedTransacciones = await AsyncStorage.getItem('transacciones');
-        if (savedTransacciones) {
-          setTransacciones(JSON.parse(savedTransacciones));
-        }
-      } catch (error) {
-        console.error('Error cargando transacciones:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadTransacciones();
-  }, []);
-
-  const registrarTransaccion = async (
-    usuarioId: string,
+  registrarTransaccion: (
+    userId: string,
     usuarioNombre: string,
     items: CartItem[],
-    total: number
-  ) => {
-    try {
-      const nuevaTransaccion: Transaction = {
-        id: Math.random().toString(36).substr(2, 9),
-        usuarioId,
-        usuarioNombre,
-        items,
-        total,
-        fecha: new Date().toLocaleDateString('es-BO', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        estado: 'completada',
-      };
+    total: number,
+    metodo?: string
+  ) => Promise<void>;
 
-      const transaccionesActualizadas = [...transacciones, nuevaTransaccion];
-      setTransacciones(transaccionesActualizadas);
-      await AsyncStorage.setItem('transacciones', JSON.stringify(transaccionesActualizadas));
-      console.log('✅ Transacción registrada:', nuevaTransaccion.id);
-    } catch (error) {
-      console.error('Error registrando transacción:', error);
-      throw error;
+  obtenerTodasTransacciones: () => Transaction[];
+  obtenerTransaccionesUsuario: (userId: string) => Transaction[];
+}
+
+export const TransactionContext = createContext<TransactionContextType | undefined>(
+  undefined
+);
+
+export const TransactionProvider = ({ children }: any) => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  /* ===================== LOAD ===================== */
+  const fetchTransactions = async () => {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setTransactions(data as Transaction[]);
     }
   };
 
-  const obtenerTransaccionesUsuario = (usuarioId: string) => {
-    return transacciones.filter((t) => t.usuarioId === usuarioId);
+  /* ===================== REALTIME ===================== */
+  useEffect(() => {
+    fetchTransactions();
+
+    const channel = supabase
+      .channel('transactions-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+        },
+        () => {
+          fetchTransactions(); // 🔥 auto refresh
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  /* ===================== INSERT ===================== */
+  const registrarTransaccion = async (
+    userId: string,
+    usuarioNombre: string,
+    items: CartItem[],
+    total: number,
+    metodo: string = 'Efectivo'
+  ) => {
+    const { error } = await supabase.from('transactions').insert([
+      {
+        user_id: userId,
+        usuario_nombre: usuarioNombre,
+        items,
+        total,
+        metodo_pago: metodo,
+      },
+    ]);
+
+    if (error) throw error;
   };
 
-  const obtenerTodasTransacciones = () => {
-    return transacciones;
-  };
+  /* ===================== GETTERS ===================== */
+  const obtenerTodasTransacciones = () => transactions;
 
-  const value: TransactionContextType = {
-    transacciones,
-    registrarTransaccion,
-    obtenerTransaccionesUsuario,
-    obtenerTodasTransacciones,
-    isLoading,
-  };
+  const obtenerTransaccionesUsuario = (userId: string) =>
+    transactions.filter((t) => t.user_id === userId);
 
-  return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>;
+  return (
+    <TransactionContext.Provider
+      value={{
+        registrarTransaccion,
+        obtenerTodasTransacciones,
+        obtenerTransaccionesUsuario,
+      }}
+    >
+      {children}
+    </TransactionContext.Provider>
+  );
 };
 
 export const useTransactions = () => {
-  const context = useContext(TransactionContext);
-  
-  if (context === undefined) {
-    throw new Error('useTransactions debe usarse dentro de TransactionProvider');
-  }
-  return context;
+  const ctx = useContext(TransactionContext);
+  if (!ctx) throw new Error('useTransactions must be used within TransactionProvider');
+  return ctx;
 };

@@ -15,7 +15,7 @@ export function TabHeader({ title }: { title: string }) {
   const handleLogout = async () => {
     try {
       await logout();
-      router.replace('/select-role');
+      router.replace('/(auth)/login');
     } catch (error) {
       console.error(error);
     }
