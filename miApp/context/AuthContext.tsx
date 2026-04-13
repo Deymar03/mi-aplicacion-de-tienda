@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// =============================
+// 👤 INTERFACES
+// =============================
 interface User {
   id: string;
   email: string;
   name: string;
   role: 'user' | 'admin';
+  puntos: number;
 }
 
 interface AuthContextType {
@@ -15,51 +19,61 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isSignedIn: boolean;
+
+  // ⭐ SISTEMA DE PUNTOS
+  agregarPuntos: (monto: number) => void;
+  actualizarPuntos: (puntos: number) => void;
 }
 
-// Credenciales predefinidas (ADMIN)
+// =============================
+// 🔐 ADMIN
+// =============================
 const ADMIN_CREDENTIALS = {
   email: 'admin',
   password: '1234',
   name: 'Admin',
 };
 
+// =============================
+// 🌐 CONTEXTO
+// =============================
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// =============================
+// 🚀 PROVIDER
+// =============================
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [usuariosRegistrados, setUsuariosRegistrados] = useState<User[]>([]);
 
-  // Verificar sesión al iniciar
+  // =============================
+  // 🔄 RESTAURAR SESIÓN
+  // =============================
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
-        // Cargar usuarios registrados
         const savedUsuarios = await AsyncStorage.getItem('usuariosRegistrados');
         if (savedUsuarios) {
           setUsuariosRegistrados(JSON.parse(savedUsuarios));
         }
 
-        // Cargar usuario actual
         const savedUser = await AsyncStorage.getItem('user');
-        console.log('🔍 Usuario guardado:', savedUser);
 
         if (savedUser) {
-          try {
-            const parsedUser = JSON.parse(savedUser);
-            setUser(parsedUser);
-            console.log('✅ Usuario restaurado:', parsedUser.name);
-          } catch (parseError) {
-            console.error('❌ Error al parsear usuario:', parseError);
-            await AsyncStorage.removeItem('user');
+          const parsedUser = JSON.parse(savedUser);
+
+          // 🔥 asegurar puntos siempre
+          if (parsedUser.puntos === undefined) {
+            parsedUser.puntos = 0;
           }
+
+          setUser(parsedUser);
         } else {
-          console.log('📝 No hay usuario guardado - mostrando login');
           setUser(null);
         }
       } catch (e) {
-        console.error('❌ Error al revisar sesión:', e);
+        console.error('❌ Error al restaurar sesión:', e);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -69,10 +83,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     bootstrapAsync();
   }, []);
 
+  // =============================
+  // 🔐 LOGIN
+  // =============================
   const login = async (email: string, password: string, role: 'user' | 'admin') => {
     setIsLoading(true);
     try {
-      // Si es admin
+      // ADMIN
       if (role === 'admin') {
         if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
           const adminUser: User = {
@@ -80,105 +97,149 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: ADMIN_CREDENTIALS.email,
             name: ADMIN_CREDENTIALS.name,
             role: 'admin',
+            puntos: 0,
           };
+
           setUser(adminUser);
           await AsyncStorage.setItem('user', JSON.stringify(adminUser));
-          console.log('✅ Login admin exitoso');
           return;
         } else {
           throw new Error('Credenciales de admin inválidas');
         }
       }
 
-      // Si es usuario (cliente)
-      const usuarioEncontrado = usuariosRegistrados.find((u) => u.email === email);
-      if (usuarioEncontrado) {
-        // Verificar contraseña (por ahora solo verificamos email y contraseña simples)
-        const contraseniaGuardada = await AsyncStorage.getItem(`pass_${email}`);
-        if (contraseniaGuardada === password) {
-          setUser(usuarioEncontrado);
-          await AsyncStorage.setItem('user', JSON.stringify(usuarioEncontrado));
-          console.log('✅ Login cliente exitoso:', usuarioEncontrado.name);
+      // CLIENTE
+      const usuario = usuariosRegistrados.find((u) => u.email === email);
+
+      if (usuario) {
+        const pass = await AsyncStorage.getItem(`pass_${email}`);
+
+        if (pass === password) {
+          const userConPuntos = {
+            ...usuario,
+            puntos: usuario.puntos || 0,
+          };
+
+          setUser(userConPuntos);
+          await AsyncStorage.setItem('user', JSON.stringify(userConPuntos));
           return;
         }
       }
 
       throw new Error('Credenciales inválidas');
     } catch (error) {
-      console.error('❌ Error en login:', error);
+      console.error('❌ Error login:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
+  // =============================
+  // 📝 REGISTER
+  // =============================
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Verificar si el email ya existe
       if (usuariosRegistrados.find((u) => u.email === email)) {
         throw new Error('El email ya está registrado');
       }
 
-      // Crear nuevo usuario
       const nuevoUsuario: User = {
         id: Math.random().toString(36).substr(2, 9),
         email,
         name,
         role: 'user',
+        puntos: 0, // ⭐ INICIALIZA PUNTOS
       };
 
-      // Guardar el usuario
-      const usuariosActualizados = [...usuariosRegistrados, nuevoUsuario];
-      setUsuariosRegistrados(usuariosActualizados);
-      await AsyncStorage.setItem('usuariosRegistrados', JSON.stringify(usuariosActualizados));
+      const nuevosUsuarios = [...usuariosRegistrados, nuevoUsuario];
 
-      // Guardar contraseña (en una aplicación real, esto debería encriptarse)
+      setUsuariosRegistrados(nuevosUsuarios);
+      await AsyncStorage.setItem('usuariosRegistrados', JSON.stringify(nuevosUsuarios));
       await AsyncStorage.setItem(`pass_${email}`, password);
 
-      // Auto-login después del registro
       setUser(nuevoUsuario);
       await AsyncStorage.setItem('user', JSON.stringify(nuevoUsuario));
 
-      console.log('✅ Registro exitoso:', nuevoUsuario.name);
     } catch (error) {
-      console.error('❌ Error en registro:', error);
+      console.error('❌ Error register:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
+  // =============================
+  // 🚪 LOGOUT
+  // =============================
   const logout = async () => {
     setIsLoading(true);
     try {
       setUser(null);
       await AsyncStorage.removeItem('user');
-      console.log('👋 Logout realizado');
     } catch (error) {
-      console.error('❌ Error en logout:', error);
+      console.error('❌ Error logout:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
+  // =============================
+  // ⭐ AGREGAR PUNTOS AUTOMÁTICOS
+  // =============================
+  const agregarPuntos = (monto: number) => {
+    if (!user) return;
+
+    const nuevos = Math.floor(monto / 10);
+
+    const actualizado = {
+      ...user,
+      puntos: (user.puntos || 0) + nuevos,
+    };
+
+    setUser(actualizado);
+    AsyncStorage.setItem('user', JSON.stringify(actualizado));
+  };
+
+  // =============================
+  // ⭐ ACTUALIZAR PUNTOS (CANJE)
+  // =============================
+  const actualizarPuntos = (puntos: number) => {
+    if (!user) return;
+
+    const actualizado = {
+      ...user,
+      puntos,
+    };
+
+    setUser(actualizado);
+    AsyncStorage.setItem('user', JSON.stringify(actualizado));
+  };
+
+  // =============================
+  // 📦 VALUE
+  // =============================
   const value: AuthContextType = {
     user,
     isLoading,
     login,
     register,
     logout,
-    isSignedIn: user !== null,
+    isSignedIn: !!user,
+    agregarPuntos,
+    actualizarPuntos,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// =============================
+// 🎯 HOOK
+// =============================
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };

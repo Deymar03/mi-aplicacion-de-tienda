@@ -1,108 +1,127 @@
 import { ThemedView } from '@/components/themed-view';
-import { TabHeader } from '@/components/tab-header';
 import { ThemedText } from '@/components/themed-text';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { TabHeader } from '@/components/tab-header';
+import { StyleSheet, ScrollView, View, TouchableOpacity, Alert } from 'react-native';
+import { useProducts } from '@/context/ProductContext';
+import { useCart } from '@/context/CartContext';
+import { useTransactions } from '@/context/TransactionContext';
+import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/context/AuthContext';
-import { useProducts } from '@/context/ProductContext';
 
-export default function HomeScreen() {
+export default function IndexScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { user } = useAuth();
+
   const { productos } = useProducts();
-  const isAdmin = user?.role === 'admin';
+  const { agregarAlCarrito } = useCart();
+  const { obtenerTransaccionesUsuario } = useTransactions();
+  const { user } = useAuth();
 
-  // Calcular estadísticas para admin
-  const totalProductos = productos.length;
-  const totalStock = productos.reduce((sum, p) => sum + p.stock, 0);
-  const gananciaTotal = productos.reduce((sum, p) => sum + (p.precioVenta - p.precioCompra) * (p.stock > 0 ? 1 : 0), 0);
+  const [puntos, setPuntos] = useState(0);
 
-  if (isAdmin) {
-    return (
-      <ThemedView style={styles.container}>
-        <TabHeader title="Dashboard Admin" />
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-          <View style={[styles.card, { backgroundColor: colors.tint + '20' }]}>
-            <ThemedText type="subtitle" style={styles.cardTitle}>📊 Dashboard Administrativo</ThemedText>
-            <ThemedText style={styles.cardText}>Gestiona tu tienda y analiza ganancias</ThemedText>
-          </View>
-          
-          <View style={styles.statsContainer}>
-            <View style={[styles.statCard, { borderLeftColor: colors.tint }]}>
-              <ThemedText type="subtitle">{totalProductos}</ThemedText>
-              <ThemedText style={styles.statLabel}>Productos</ThemedText>
-            </View>
-            <View style={[styles.statCard, { borderLeftColor: colors.tint }]}>
-              <ThemedText type="subtitle">{totalStock}</ThemedText>
-              <ThemedText style={styles.statLabel}>Stock Total</ThemedText>
-            </View>
-            <View style={[styles.statCard, { borderLeftColor: colors.tint }]}>
-              <ThemedText type="subtitle" style={{ color: colors.tint }}>+Bs. {gananciaTotal.toFixed(2)}</ThemedText>
-              <ThemedText style={styles.statLabel}>Ganancia Potencial</ThemedText>
-            </View>
-          </View>
-        </ScrollView>
-      </ThemedView>
-    );
-  }
+  // 🔥 Calcular puntos automáticamente
+  useEffect(() => {
+    const transacciones = obtenerTransaccionesUsuario(user?.id || '');
 
-  // Vista para CLIENTE
+    let totalGastado = 0;
+    transacciones.forEach((t) => {
+      totalGastado += t.total;
+    });
+
+    setPuntos(Math.floor(totalGastado / 10)); // 10 Bs = 1 punto
+  }, []);
+
+  // 🔥 Productos canjeables
+  const productosPuntos = productos.filter(p => p.puntos && p.puntos > 0);
+
+  const canjearProducto = (prod: any) => {
+    if (puntos < prod.puntos) {
+      Alert.alert('Sin puntos', 'No tienes suficientes puntos');
+      return;
+    }
+
+    agregarAlCarrito(prod, 1);
+
+    Alert.alert('Canje exitoso', `Canjeaste ${prod.nombre}`);
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <TabHeader title="Tienda de Barrio" />
+      <TabHeader title="Recompensas 🎁" />
+
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={[styles.card, { backgroundColor: colors.tint + '20' }]}>
-          <ThemedText type="subtitle" style={styles.cardTitle}>🛒 Bienvenido a la Tienda</ThemedText>
-          <ThemedText style={styles.cardText}>Explora nuestros productos y realiza compras</ThemedText>
-        </View>
         
-        <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { borderLeftColor: colors.tint }]}>
-            <ThemedText type="subtitle">{totalProductos}</ThemedText>
-            <ThemedText style={styles.statLabel}>Productos Disponibles</ThemedText>
-          </View>
+        {/* PUNTOS */}
+        <View style={[styles.pointsCard, { backgroundColor: colors.tint }]}>
+          <ThemedText style={styles.pointsLabel}>Tus Puntos</ThemedText>
+          <ThemedText style={styles.pointsValue}>{puntos}</ThemedText>
         </View>
+
+        <ThemedText style={styles.sectionTitle}>
+          Canjear Productos
+        </ThemedText>
+
+        {productosPuntos.map((prod) => (
+          <View key={prod.id} style={styles.rewardCard}>
+            <ThemedText>{prod.nombre}</ThemedText>
+            <ThemedText>{prod.puntos} puntos</ThemedText>
+
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: colors.tint }]}
+              onPress={() => canjearProducto(prod)}
+            >
+              <ThemedText style={{ color: '#fff' }}>
+                Canjear
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        ))}
+
       </ScrollView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 16,
-    paddingBottom: 30,
-  },
-  card: {
+  container: { flex: 1 },
+  content: { flex: 1 },
+  contentContainer: { padding: 16 },
+
+  pointsCard: {
+    padding: 20,
     borderRadius: 12,
-    padding: 16,
+    alignItems: 'center',
     marginBottom: 20,
   },
-  cardTitle: {
-    marginBottom: 8,
+
+  pointsLabel: {
+    color: '#fff',
   },
-  cardText: {
-    opacity: 0.7,
+
+  pointsValue: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '700',
   },
-  statsContainer: {
-    gap: 12,
+
+  sectionTitle: {
+    marginBottom: 10,
+    fontWeight: '600',
   },
-  statCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
+
+  rewardCard: {
+    padding: 12,
+    borderWidth: 1,
     borderRadius: 10,
-    borderLeftWidth: 4,
+    marginBottom: 10,
   },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 4,
-    opacity: 0.7,
+
+  button: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 6,
+    alignItems: 'center',
   },
 });
