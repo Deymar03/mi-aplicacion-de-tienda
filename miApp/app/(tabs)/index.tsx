@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
 
   pointsLabel: {
-    color: '#fff',
+    color: '#ffffff',
   },
 
   pointsValue: {

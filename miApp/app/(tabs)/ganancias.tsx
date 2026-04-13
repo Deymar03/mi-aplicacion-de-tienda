@@ -16,11 +16,14 @@ import { useCart } from '@/context/CartContext';
 import { useProducts } from '@/context/ProductContext';
 import { useTransactions } from '@/context/TransactionContext';
 import { useState } from 'react';
-
+const ganancia = (p: any) => p.precioVenta - p.precioCompra;
 export default function GananciasScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-
+const gananciaReal = (p: any) => {
+  const ingreso = p.precioVenta * p.stock;
+  return ingreso - p.precioCompra;
+};
   const { user, agregarPuntos } = useAuth();
   const {
     items,
@@ -30,7 +33,12 @@ export default function GananciasScreen() {
     actualizarCantidad,
   } = useCart();
   const { reducirStock } = useProducts();
-  const { registrarTransaccion, obtenerTransaccionesUsuario } = useTransactions();
+  
+const {
+  registrarTransaccion,
+  obtenerTransaccionesUsuario,
+  obtenerTodasTransacciones,
+} = useTransactions();
 
   const [facturaVisible, setFacturaVisible] = useState(false);
   const [ultimaFactura, setUltimaFactura] = useState<any>(null);
@@ -39,8 +47,14 @@ export default function GananciasScreen() {
 
   const total = calcularTotal();
 
-  const ventas = obtenerTransaccionesUsuario(user?.id || '');
+const ventas = user?.role === 'admin'
+  ? obtenerTodasTransacciones()
+  : obtenerTransaccionesUsuario(user?.id || ''); 
   const totalVentas = ventas.reduce((acc, t) => acc + t.total, 0);
+
+const gananciaNeta = totalVentas * 0.3;
+const estimadoFuturo = totalVentas * 1.4;
+
 
   const confirmarCompra = async (metodo: string) => {
     try {
@@ -55,7 +69,7 @@ export default function GananciasScreen() {
         total
       );
 
-      agregarPuntos(total);if (user?.role !== 'admin') {
+  if (user?.role !== 'admin') {
   agregarPuntos(total);
 }
 
@@ -127,12 +141,65 @@ export default function GananciasScreen() {
 
         {/* ADMIN REPORTE */}
         {user?.role === 'admin' && (
-          <View style={{ marginBottom: 10 }}>
-            <ThemedText>📊 Reporte</ThemedText>
-            <ThemedText>Total ventas: Bs. {totalVentas}</ThemedText>
-            <ThemedText>Total transacciones: {ventas.length}</ThemedText>
-          </View>
-        )}
+  <View style={styles.adminPanel}>
+
+    {/* ================= RESUMEN ================= */}
+    <ThemedText style={styles.bigTitle}>
+      📊 Panel de Ganancias
+    </ThemedText>
+
+    <View style={styles.summaryBox}>
+      <ThemedText style={styles.summaryTitle}>
+        Ganancias actuales
+      </ThemedText>
+
+      <ThemedText style={styles.summaryValue}>
+        Bs {totalVentas.toFixed(2)}
+      </ThemedText>
+    </View>
+
+    <View style={styles.summaryBox}>
+      <ThemedText style={styles.summaryTitle}>
+        Ganancias posibles
+      </ThemedText>
+
+      <ThemedText style={styles.summaryValue}>
+        Bs {(totalVentas * 1.3).toFixed(2)}
+      </ThemedText>
+    </View>
+
+    {/* ================= HISTORIAL ================= */}
+    <ThemedText style={styles.sectionTitle}>
+      📜 Historial de ventas
+    </ThemedText>
+
+    {ventas.map((v: any) => (
+      <View key={v.id} style={styles.ticket}>
+
+        <ThemedText style={styles.ticketUser}>
+          👤 {v.usuarioNombre}
+        </ThemedText>
+
+        <ThemedText style={styles.ticketDate}>
+          📅 {v.fecha}
+        </ThemedText>
+
+        {/* PRODUCTOS */}
+        {v.items.map((item: any, i: number) => (
+          <ThemedText key={i} style={styles.ticketItem}>
+            🛒 {item.producto.nombre} x{item.cantidad}
+          </ThemedText>
+        ))}
+
+        <ThemedText style={styles.ticketTotal}>
+          💵 Total: Bs {v.total}
+        </ThemedText>
+
+      </View>
+    ))}
+
+  </View>
+)}
 
 
     {items.length === 0 ? (
@@ -295,4 +362,70 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontWeight: '700',
   },
+  adminPanel: {
+  marginBottom: 20,
+},
+
+bigTitle: {
+  fontSize: 18,
+  fontWeight: '800',
+  marginBottom: 10,
+  color: '#ede5e5',
+},
+
+summaryBox: {
+  padding: 10,
+  borderRadius: 10,
+  backgroundColor: '#1f2937',
+  marginBottom: 8,
+  borderWidth: 1,
+  borderColor: '#283547',
+},
+
+summaryTitle: {
+  fontSize: 15,
+  color: '#64748b',
+},
+
+summaryValue: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#16a34a',
+},
+
+sectionTitle: {
+  marginTop: 15,
+  fontSize: 14,
+  fontWeight: '700',
+},
+
+ticket: {
+  marginTop: 10,
+  padding: 10,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: '#283547',
+  backgroundColor: '#1f2937',
+},
+
+ticketUser: {
+  fontWeight: '700',
+},
+
+ticketDate: {
+  fontSize: 13,
+  color: '#afb4ba',
+  marginBottom: 5,
+},
+
+ticketItem: {
+  fontSize: 13,
+  color: '#afb4ba',
+},
+
+ticketTotal: {
+  marginTop: 6,
+  fontWeight: '700',
+  color: '#16a34a',
+},
 });
