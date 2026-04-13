@@ -24,6 +24,7 @@ const gananciaReal = (p: any) => {
   const ingreso = p.precioVenta * p.stock;
   return ingreso - p.precioCompra;
 };
+
   const { user, agregarPuntos } = useAuth();
   const {
     items,
@@ -105,7 +106,7 @@ const estimadoFuturo = totalVentas * 1.4;
         <TabHeader title="Factura" />
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <View style={styles.factura}>
-            <ThemedText type="title">✅ Compra exitosa</ThemedText>
+            <ThemedText type="title"> Compra exitosa</ThemedText>
 
             <ThemedText>Cliente: {ultimaFactura.cliente}</ThemedText>
             <ThemedText>Fecha: {ultimaFactura.fecha}</ThemedText>
@@ -145,7 +146,7 @@ const estimadoFuturo = totalVentas * 1.4;
 
     {/* ================= RESUMEN ================= */}
     <ThemedText style={styles.bigTitle}>
-      📊 Panel de Ganancias
+       Panel de Ganancias
     </ThemedText>
 
     <View style={styles.summaryBox}>
@@ -170,10 +171,12 @@ const estimadoFuturo = totalVentas * 1.4;
 
     {/* ================= HISTORIAL ================= */}
     <ThemedText style={styles.sectionTitle}>
-      📜 Historial de ventas
+       Historial de ventas
     </ThemedText>
 
-    {ventas.map((v: any) => (
+    {[...ventas]
+  .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+  .map((v: any) => (
       <View key={v.id} style={styles.ticket}>
 
         <ThemedText style={styles.ticketUser}>
@@ -181,18 +184,18 @@ const estimadoFuturo = totalVentas * 1.4;
         </ThemedText>
 
         <ThemedText style={styles.ticketDate}>
-          📅 {v.fecha}
+          fecha: {v.fecha}
         </ThemedText>
 
         {/* PRODUCTOS */}
         {v.items.map((item: any, i: number) => (
           <ThemedText key={i} style={styles.ticketItem}>
-            🛒 {item.producto.nombre} x{item.cantidad}
+            producto {item.producto.nombre} x{item.cantidad}
           </ThemedText>
         ))}
 
         <ThemedText style={styles.ticketTotal}>
-          💵 Total: Bs {v.total}
+           Total: Bs {v.total}
         </ThemedText>
 
       </View>

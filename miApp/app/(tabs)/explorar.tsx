@@ -19,8 +19,11 @@ import { useState } from 'react';
 
 /* ===================== HELPERS ===================== */
 
-const gananciaUnidad = (p: any) => p.precioVenta - p.precioCompra;
-const gananciaTotal = (p: any) => (p.precioVenta - p.precioCompra) * p.stock;
+const gananciaTotal = (p: any) => {
+  const costoUnidad = p.precioCompra / (p.unidadesPorCompra || 1);
+  const gananciaUnidad = p.precioVenta - costoUnidad;
+  return gananciaUnidad * p.stock;
+};
 
 const CATEGORIAS = ['Alimentos', 'Bebidas', 'Limpieza', 'Higiene'];
 
@@ -242,11 +245,11 @@ export default function ProductosScreen() {
 
                 {prod.esCanjeable ? (
                   <ThemedText style={styles.points}>
-                    🎁 {prod.puntosRequeridos} puntos
+                     {prod.puntosRequeridos} puntos
                   </ThemedText>
                 ) : (
                   <ThemedText style={styles.subText}>
-                    💰 Venta normal
+                    Venta normal
                   </ThemedText>
                 )}
               </View>
@@ -299,7 +302,7 @@ export default function ProductosScreen() {
         </View>
       </ScrollView>
 
-      {/* ================= MODAL EDIT ================= */}
+      
      {/* ================= MODAL EDIT MEJORADO ================= */}
 {editVisible && (
   <View style={styles.modalOverlay}>
