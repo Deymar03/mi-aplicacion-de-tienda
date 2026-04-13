@@ -30,7 +30,7 @@ export default function GananciasScreen() {
     actualizarCantidad,
   } = useCart();
   const { reducirStock } = useProducts();
-  const { registrarTransaccion } = useTransactions();
+  const { registrarTransaccion, obtenerTransaccionesUsuario } = useTransactions();
 
   const [facturaVisible, setFacturaVisible] = useState(false);
   const [ultimaFactura, setUltimaFactura] = useState<any>(null);
@@ -39,9 +39,9 @@ export default function GananciasScreen() {
 
   const total = calcularTotal();
 
-  // ==========================
-  // 🧾 CONFIRMAR COMPRA
-  // ==========================
+  const ventas = obtenerTransaccionesUsuario(user?.id || '');
+  const totalVentas = ventas.reduce((acc, t) => acc + t.total, 0);
+
   const confirmarCompra = async (metodo: string) => {
     try {
       for (const item of items) {
@@ -55,8 +55,9 @@ export default function GananciasScreen() {
         total
       );
 
-      // ⭐ PUNTOS AQUÍ (CORRECTO)
-      agregarPuntos(total);
+      agregarPuntos(total);if (user?.role !== 'admin') {
+  agregarPuntos(total);
+}
 
       const factura = {
         fecha: new Date().toLocaleString(),
@@ -84,9 +85,6 @@ export default function GananciasScreen() {
     setMostrarPago(true);
   };
 
-  // ==========================
-  // 🧾 FACTURA
-  // ==========================
   if (facturaVisible && ultimaFactura) {
     return (
       <ThemedView style={styles.container}>
@@ -121,17 +119,25 @@ export default function GananciasScreen() {
     );
   }
 
-  // ==========================
-  // 🛒 CARRITO
-  // ==========================
   return (
     <ThemedView style={styles.container}>
-      <TabHeader title="Carrito" />
+      <TabHeader title={user?.role === 'admin' ? "Panel Admin" : "Carrito"} />
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        {items.length === 0 ? (
-          <ThemedText>🛒 Vacío</ThemedText>
-        ) : (
+
+        {/* ADMIN REPORTE */}
+        {user?.role === 'admin' && (
+          <View style={{ marginBottom: 10 }}>
+            <ThemedText>📊 Reporte</ThemedText>
+            <ThemedText>Total ventas: Bs. {totalVentas}</ThemedText>
+            <ThemedText>Total transacciones: {ventas.length}</ThemedText>
+          </View>
+        )}
+
+
+    {items.length === 0 ? (
+      <ThemedText>🛒 Vacío</ThemedText>
+    ) : (
           <>
             {items.map((item, i) => (
               <View key={i} style={styles.cartItem}>
@@ -140,7 +146,6 @@ export default function GananciasScreen() {
                   <ThemedText>Bs. {item.precioUnitario}</ThemedText>
                 </View>
 
-                {/* 🔥 CONTROL DE CANTIDAD */}
                 <View style={styles.qty}>
                   <TouchableOpacity
                     onPress={() =>
@@ -162,6 +167,7 @@ export default function GananciasScreen() {
                 </View>
 
                 <TouchableOpacity
+                  style={styles.deleteBtn}
                   onPress={() => removerDelCarrito(item.producto.id)}
                 >
                   <ThemedText style={{ color: 'red' }}>✕</ThemedText>
@@ -169,13 +175,11 @@ export default function GananciasScreen() {
               </View>
             ))}
 
-            {/* TOTAL */}
             <View style={styles.totalCard}>
               <ThemedText>Total</ThemedText>
               <ThemedText>Bs. {total}</ThemedText>
             </View>
 
-            {/* BOTÓN */}
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: colors.tint }]}
               onPress={handleCompra}
@@ -185,7 +189,6 @@ export default function GananciasScreen() {
               </ThemedText>
             </TouchableOpacity>
 
-            {/* MÉTODOS */}
             {mostrarPago && !mostrarQR && (
               <View style={styles.box}>
                 <TouchableOpacity
@@ -204,7 +207,6 @@ export default function GananciasScreen() {
               </View>
             )}
 
-            {/* QR */}
             {mostrarQR && (
               <View style={styles.qrBox}>
                 <ThemedText>Escanea QR</ThemedText>
@@ -224,39 +226,37 @@ export default function GananciasScreen() {
                 </TouchableOpacity>
               </View>
             )}
-          </>
-        )}
+             </>
+           )}
       </ScrollView>
-    </ThemedView>
-  );
+
+  </ThemedView>
+          );
 }
 
-// ==========================
-// 🎨 ESTILOS OPTIMIZADOS
-// ==========================
 const styles = StyleSheet.create({
   container: { flex: 1 },
   contentContainer: { padding: 12 },
 
- cartItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 8,
-  padding: 6,
-  borderWidth: 1,
-  borderRadius: 8,
-},
+  cartItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    padding: 6,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
 
-qty: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginHorizontal: 10, // 🔥 separación real
-  gap: 6,
-},
+  qty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    gap: 6,
+  },
 
-deleteBtn: {
-  marginLeft: 12, // 🔥 separa la X
-},
+  deleteBtn: {
+    marginLeft: 12,
+  },
 
   totalCard: {
     marginVertical: 10,
@@ -265,10 +265,9 @@ deleteBtn: {
   },
 
   btn: {
-    padding: 8,
+    padding: 6,
     borderRadius: 6,
     alignItems: 'center',
-    marginTop: 8,
   },
 
   box: {

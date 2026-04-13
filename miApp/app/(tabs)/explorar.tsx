@@ -16,13 +16,16 @@ export default function ProductosScreen() {
   const colors = Colors[colorScheme ?? 'light'];
 
   const { user, actualizarPuntos } = useAuth();
-  const { productos, reducirStock } = useProducts();
+  const { productos, reducirStock, actualizarProducto, eliminarProducto } = useProducts();
   const { agregarAlCarrito } = useCart();
 
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const productosDisponibles = productos.filter(
-    (p) => !(p.esCanjeable ?? false) && p.stock > 0 && (!selectedCategory || p.categoria === selectedCategory)
+    (p) =>
+      !(p.esCanjeable ?? false) &&
+      p.stock > 0 &&
+      (!selectedCategory || p.categoria === selectedCategory)
   );
 
   const productosCanje = productos.filter(
@@ -70,7 +73,6 @@ export default function ProductosScreen() {
               <View style={[styles.card, { borderColor: colors.tint }]}>
                 <ThemedText style={styles.name}>{prod.nombre}</ThemedText>
                 <ThemedText style={styles.cat}>{prod.categoria}</ThemedText>
-
                 <ThemedText style={styles.price}>Bs. {prod.precioVenta}</ThemedText>
 
                 <TouchableOpacity
@@ -81,6 +83,53 @@ export default function ProductosScreen() {
                   }}>
                   <ThemedText style={styles.btnText}>+ Agregar</ThemedText>
                 </TouchableOpacity>
+
+                {/* ADMIN CONTROLES */}
+                {user?.role === 'admin' && (
+                  <View style={{ flexDirection: 'row', marginTop: 4, gap: 6 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        Alert.alert(
+                          'Editar precio',
+                          '¿Deseas editar este producto?',
+                          [
+                            {
+                              text: 'Cancelar',
+                              style: 'cancel',
+                            },
+                            {
+                              text: 'Subir +1 Bs',
+                              onPress: () =>
+                                actualizarProducto(prod.id, {
+                                  precioVenta: prod.precioVenta + 1,
+                                }),
+                            },
+                            {
+                              text: 'Bajar -1 Bs',
+                              onPress: () =>
+                                actualizarProducto(prod.id, {
+                                  precioVenta: Math.max(1, prod.precioVenta - 1),
+                                }),
+                            },
+                          ]
+                        );
+                      }}
+                    >
+                      <ThemedText style={{ color: 'orange', fontSize: 10 }}>
+                        Editar
+                      </ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => eliminarProducto(prod.id)}
+                    >
+                      <ThemedText style={{ color: 'red', fontSize: 10 }}>
+                        Eliminar
+                      </ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
               </View>
             </View>
           ))}
@@ -111,6 +160,7 @@ export default function ProductosScreen() {
             <ThemedText>⭐ {prod.puntosRequeridos ?? 0} puntos</ThemedText>
           </TouchableOpacity>
         ))}
+
       </ScrollView>
     </ThemedView>
   );
@@ -148,24 +198,23 @@ const styles = StyleSheet.create({
 
   card: {
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 6,
+    padding: 6,
   },
 
   name: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
+  },
+
+  price: {
+    fontSize: 12,
+    fontWeight: '700',
   },
 
   cat: {
     fontSize: 10,
     opacity: 0.6,
-  },
-
-  price: {
-    fontSize: 14,
-    fontWeight: '700',
-    marginVertical: 4,
   },
 
   btn: {

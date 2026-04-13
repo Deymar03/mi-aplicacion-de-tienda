@@ -95,25 +95,33 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // ==========================
   // ➕ AGREGAR PRODUCTO
   // ==========================
-  const agregarProducto = async (producto: Omit<Product, 'id'>) => {
-    try {
-      const nuevoProducto: Product = {
-        ...producto,
-        id: Math.random().toString(36).substr(2, 9),
+const agregarProducto = async (producto: Omit<Product, 'id'>) => {
+  try {
+    // 🔥 VALIDACIÓN
+    const existe = productos.find(
+      (p) => p.nombre.toLowerCase() === producto.nombre.toLowerCase()
+    );
 
-        // ✅ asegurar valores
-        esCanjeable: producto.esCanjeable || false,
-        puntosRequeridos: producto.puntosRequeridos || 0,
-      };
-
-      const productosActualizados = [...productos, nuevoProducto];
-      setProductos(productosActualizados);
-      await AsyncStorage.setItem('productos', JSON.stringify(productosActualizados));
-    } catch (error) {
-      console.error('Error agregando producto:', error);
-      throw error;
+    if (existe) {
+      throw new Error('El producto ya existe');
     }
-  };
+
+    const nuevoProducto: Product = {
+      ...producto,
+      id: Math.random().toString(36).substr(2, 9),
+      esCanjeable: producto.esCanjeable || false,
+      puntosRequeridos: producto.puntosRequeridos || 0,
+    };
+
+    const productosActualizados = [...productos, nuevoProducto];
+
+    setProductos(productosActualizados);
+    await AsyncStorage.setItem('productos', JSON.stringify(productosActualizados));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
   // ==========================
   // ✏️ ACTUALIZAR PRODUCTO
