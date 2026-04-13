@@ -8,9 +8,7 @@ export interface Product {
   precioCompra: number;
   precioVenta: number;
   stock: number;
-  imagen?: string;
 
-  // ✅ NUEVO SISTEMA DE PUNTOS
   esCanjeable?: boolean;
   puntosRequeridos?: number;
 }

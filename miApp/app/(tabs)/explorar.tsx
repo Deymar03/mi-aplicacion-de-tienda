@@ -9,23 +9,25 @@ import { useProducts } from '@/context/ProductContext';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 
-const CATEGORIAS = ['Alimentos', 'Bebidas', 'Limpieza', 'Higiene', 'Electrónica', 'Ropa'];
+const CATEGORIAS = ['Alimentos', 'Bebidas', 'Limpieza', 'Higiene'];
 
 export default function ProductosScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const { user, actualizarPuntos } = useAuth();
-  const { productos } = useProducts();
+  const { productos, reducirStock } = useProducts();
   const { agregarAlCarrito } = useCart();
 
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const productosDisponibles = productos.filter(
-    (p) => !p.esCanjeable && p.stock > 0 && (!selectedCategory || p.categoria === selectedCategory)
+    (p) => !(p.esCanjeable ?? false) && p.stock > 0 && (!selectedCategory || p.categoria === selectedCategory)
   );
 
-  const productosCanje = productos.filter((p) => p.esCanjeable);
+  const productosCanje = productos.filter(
+    (p) => (p.esCanjeable ?? false) && (p.puntosRequeridos ?? 0) > 0
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -37,7 +39,7 @@ export default function ProductosScreen() {
         <View style={[styles.pointsCard, { backgroundColor: colors.tint + '20' }]}>
           <ThemedText>⭐ Tus puntos</ThemedText>
           <ThemedText style={{ color: colors.tint, fontWeight: '700' }}>
-            {user?.puntos || 0}
+            {user?.puntos ?? 0}
           </ThemedText>
         </View>
 
@@ -91,18 +93,24 @@ export default function ProductosScreen() {
           <TouchableOpacity
             key={prod.id}
             style={[styles.card, { marginTop: 10 }]}
-            onPress={() => {
-              if ((user?.puntos || 0) >= prod.puntosRequeridos) {
-                actualizarPuntos((user?.puntos || 0) - prod.puntosRequeridos);
+            onPress={async () => {
+              if (prod.stock <= 0) {
+                Alert.alert('Sin stock');
+                return;
+              }
+
+              if ((user?.puntos ?? 0) >= (prod.puntosRequeridos ?? 0)) {
+                actualizarPuntos((user?.puntos ?? 0) - (prod.puntosRequeridos ?? 0));
+                await reducirStock(prod.id, 1);
                 Alert.alert('Canje exitoso', prod.nombre);
               } else {
                 Alert.alert('Puntos insuficientes');
               }
             }}>
             <ThemedText>{prod.nombre}</ThemedText>
-            <ThemedText>⭐ {prod.puntosRequeridos} puntos</ThemedText>
+            <ThemedText>⭐ {prod.puntosRequeridos ?? 0} puntos</ThemedText>
           </TouchableOpacity>
-        ))} 
+        ))}
       </ScrollView>
     </ThemedView>
   );
@@ -111,7 +119,7 @@ export default function ProductosScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1 },
-  contentContainer: { padding: 10 },
+  contentContainer: { padding: 12 },
 
   pointsCard: {
     padding: 10,
@@ -122,7 +130,7 @@ const styles = StyleSheet.create({
   },
 
   filterButton: {
-    padding: 6,
+    padding: 8,
     borderRadius: 20,
     marginRight: 6,
   },
@@ -141,33 +149,33 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderRadius: 8,
-    padding: 6, // MÁS COMPACTO
+    padding: 8,
   },
 
   name: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
   },
 
   cat: {
-    fontSize: 9,
+    fontSize: 10,
     opacity: 0.6,
   },
 
   price: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    marginVertical: 3,
+    marginVertical: 4,
   },
 
   btn: {
-    padding: 5,
+    padding: 6,
     borderRadius: 6,
     alignItems: 'center',
   },
 
   btnText: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#fff',
   },
 });

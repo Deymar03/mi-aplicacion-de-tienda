@@ -4,9 +4,7 @@ import { TabHeader } from '@/components/tab-header';
 import { StyleSheet, ScrollView, View, TouchableOpacity, Alert } from 'react-native';
 import { useProducts } from '@/context/ProductContext';
 import { useCart } from '@/context/CartContext';
-import { useTransactions } from '@/context/TransactionContext';
 import { useAuth } from '@/context/AuthContext';
-import { useState, useEffect } from 'react';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -14,37 +12,36 @@ export default function IndexScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
-  const { productos } = useProducts();
+  const { productos, reducirStock } = useProducts();
   const { agregarAlCarrito } = useCart();
-  const { obtenerTransaccionesUsuario } = useTransactions();
-  const { user } = useAuth();
+  const { user, actualizarPuntos } = useAuth();
 
-  const [puntos, setPuntos] = useState(0);
+  const puntos = user?.puntos ?? 0;
 
-  // 🔥 Calcular puntos automáticamente
-  useEffect(() => {
-    const transacciones = obtenerTransaccionesUsuario(user?.id || '');
+  // ✅ SOLO productos canjeables
+  const productosPuntos = productos.filter(
+    (p) => (p.esCanjeable ?? false) && (p.puntosRequeridos ?? 0) > 0
+  );
 
-    let totalGastado = 0;
-    transacciones.forEach((t) => {
-      totalGastado += t.total;
-    });
+  const canjearProducto = async (prod: any) => {
+    if ((prod.stock ?? 0) <= 0) {
+      Alert.alert('Sin stock');
+      return;
+    }
 
-    setPuntos(Math.floor(totalGastado / 10)); // 10 Bs = 1 punto
-  }, []);
-
-  // 🔥 Productos canjeables
-  const productosPuntos = productos.filter(p => p.puntos && p.puntos > 0);
-
-  const canjearProducto = (prod: any) => {
-    if (puntos < prod.puntos) {
+    if (puntos < (prod.puntosRequeridos ?? 0)) {
       Alert.alert('Sin puntos', 'No tienes suficientes puntos');
       return;
     }
 
-    agregarAlCarrito(prod, 1);
+    try {
+      actualizarPuntos(puntos - (prod.puntosRequeridos ?? 0));
+      await reducirStock(prod.id, 1);
 
-    Alert.alert('Canje exitoso', `Canjeaste ${prod.nombre}`);
+      Alert.alert('Canje exitoso', `Canjeaste ${prod.nombre}`);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo canjear');
+    }
   };
 
   return (
@@ -53,7 +50,7 @@ export default function IndexScreen() {
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         
-        {/* PUNTOS */}
+        {/* ⭐ PUNTOS */}
         <View style={[styles.pointsCard, { backgroundColor: colors.tint }]}>
           <ThemedText style={styles.pointsLabel}>Tus Puntos</ThemedText>
           <ThemedText style={styles.pointsValue}>{puntos}</ThemedText>
@@ -63,22 +60,25 @@ export default function IndexScreen() {
           Canjear Productos
         </ThemedText>
 
-        {productosPuntos.map((prod) => (
-          <View key={prod.id} style={styles.rewardCard}>
-            <ThemedText>{prod.nombre}</ThemedText>
-            <ThemedText>{prod.puntos} puntos</ThemedText>
+        {productosPuntos.length === 0 ? (
+          <ThemedText>No hay productos disponibles</ThemedText>
+        ) : (
+          productosPuntos.map((prod) => (
+            <View key={prod.id} style={[styles.rewardCard, { borderColor: colors.tint }]}>
+              <ThemedText>{prod.nombre}</ThemedText>
+              <ThemedText>⭐ {prod.puntosRequeridos ?? 0} puntos</ThemedText>
 
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.tint }]}
-              onPress={() => canjearProducto(prod)}
-            >
-              <ThemedText style={{ color: '#fff' }}>
-                Canjear
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-        ))}
-
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: colors.tint }]}
+                onPress={() => canjearProducto(prod)}
+              >
+                <ThemedText style={{ color: '#fff' }}>
+                  Canjear
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
       </ScrollView>
     </ThemedView>
   );
