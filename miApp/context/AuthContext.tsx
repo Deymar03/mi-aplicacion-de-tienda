@@ -189,34 +189,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // =============================
   // ⭐ AGREGAR PUNTOS AUTOMÁTICOS
   // =============================
-  const agregarPuntos = (monto: number) => {
-    if (!user) return;
+const agregarPuntos = async (monto: number) => {
+  if (!user) return;
 
-    const nuevos = Math.floor(monto / 10);
+  const nuevos = Math.floor(monto / 10);
 
-    const actualizado = {
-      ...user,
-      puntos: (user.puntos || 0) + nuevos,
-    };
-
-    setUser(actualizado);
-    AsyncStorage.setItem('user', JSON.stringify(actualizado));
+  const actualizado = {
+    ...user,
+    puntos: (user.puntos || 0) + nuevos,
   };
 
+  setUser(actualizado);
+
+  await AsyncStorage.setItem('user', JSON.stringify(actualizado));
+
+  // 🔥 MISMO ARREGLO
+  const savedUsuarios = await AsyncStorage.getItem('usuariosRegistrados');
+  if (savedUsuarios) {
+    const lista = JSON.parse(savedUsuarios);
+
+    const nuevaLista = lista.map((u: any) =>
+      u.id === user.id ? actualizado : u
+    );
+
+    await AsyncStorage.setItem('usuariosRegistrados', JSON.stringify(nuevaLista));
+  }
+};
   // =============================
   // ⭐ ACTUALIZAR PUNTOS (CANJE)
   // =============================
-  const actualizarPuntos = (puntos: number) => {
-    if (!user) return;
+const actualizarPuntos = async (puntos: number) => {
+  if (!user) return;
 
-    const actualizado = {
-      ...user,
-      puntos,
-    };
-
-    setUser(actualizado);
-    AsyncStorage.setItem('user', JSON.stringify(actualizado));
+  const actualizado = {
+    ...user,
+    puntos,
   };
+
+  setUser(actualizado);
+
+  // ✅ actualizar usuario actual
+  await AsyncStorage.setItem('user', JSON.stringify(actualizado));
+
+  // 🔥 ACTUALIZAR LISTA COMPLETA
+  const savedUsuarios = await AsyncStorage.getItem('usuariosRegistrados');
+  if (savedUsuarios) {
+    const lista = JSON.parse(savedUsuarios);
+
+    const nuevaLista = lista.map((u: any) =>
+      u.id === user.id ? actualizado : u
+    );
+
+    await AsyncStorage.setItem('usuariosRegistrados', JSON.stringify(nuevaLista));
+  }
+};
 
   // =============================
   // 📦 VALUE
