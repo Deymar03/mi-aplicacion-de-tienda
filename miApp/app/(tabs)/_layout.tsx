@@ -23,7 +23,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
+          backgroundColor: colorScheme === 'dark' ? '#202020' : '#ffffff',
           borderTopColor: colors.border || '#e0e0e0',
           borderTopWidth: 1,
           paddingBottom: 5,
@@ -35,43 +35,48 @@ export default function TabLayout() {
           fontWeight: '600',
           marginTop: 5,
         },
-      }}>
+      }}
+    >
       {isAdmin ? (
-        // Tabs para ADMIN
         <>
+          {/* ================= ADMIN ================= */}
+
           <Tabs.Screen
             name="index"
             options={{
               title: 'Dashboard',
               tabBarIcon: ({ color }) => (
-                <IconSymbol size={28} name="chart.bar" color={color} />
+                <IconSymbol size={28} name="chart.bar.fill" color={color} />
               ),
             }}
           />
+
           <Tabs.Screen
             name="explorar"
             options={{
               title: 'Productos',
               tabBarIcon: ({ color }) => (
-                <IconSymbol size={28} name="plus.circle.fill" color={color} />
+                <IconSymbol size={28} name="cube.box.fill" color={color} />
               ),
-              href: '/explorar',
+              href: '/productos',
             }}
           />
+
           <Tabs.Screen
             name="ganancias"
             options={{
-              title: 'Ganancias',
+              title: 'Ventas',
               tabBarIcon: ({ color }) => (
-                <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />
+                <IconSymbol size={28} name="chart.line.uptrend.xyaxis" color={color} />
               ),
-              href: '/ganancias',
+              href: '/ventas',
             }}
           />
         </>
       ) : (
-        // Tabs para CLIENTE
         <>
+          {/* ================= CLIENTE ================= */}
+
           <Tabs.Screen
             name="index"
             options={{
@@ -81,6 +86,7 @@ export default function TabLayout() {
               ),
             }}
           />
+
           <Tabs.Screen
             name="explorar"
             options={{
@@ -88,9 +94,10 @@ export default function TabLayout() {
               tabBarIcon: ({ color }) => (
                 <IconSymbol size={28} name="magnifyingglass" color={color} />
               ),
-              href: '/explorar',
+              href: '/productos',
             }}
           />
+
           <Tabs.Screen
             name="ganancias"
             options={{
@@ -98,7 +105,7 @@ export default function TabLayout() {
               tabBarIcon: ({ color }) => (
                 <IconSymbol size={28} name="cart.fill" color={color} />
               ),
-              href: '/ganancias',
+              href: '/ventas',
             }}
           />
         </>

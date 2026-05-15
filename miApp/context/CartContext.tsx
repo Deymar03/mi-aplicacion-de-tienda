@@ -1,3 +1,4 @@
+//este es el cart context es para manejar el carrito de compras en la aplicacion
 import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from './ProductContext';

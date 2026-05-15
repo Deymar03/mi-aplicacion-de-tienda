@@ -8,13 +8,13 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export function TabHeader({ title }: { title: string }) {
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { signOut, user } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       router.replace('/(auth)/login');
     } catch (error) {
       console.error(error);
