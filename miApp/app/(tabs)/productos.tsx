@@ -801,12 +801,12 @@ const confirmarEliminar = (
               ) : (
                 <TouchableOpacity
                   style={styles.addBtn}
-onPress={() =>
-  agregarAlCarrito(
-    producto,
-    1
-  )
-}
+                    onPress={() =>
+                      agregarAlCarrito(
+                        producto,
+                        1
+                      )
+                    }
                 >
                   <ThemedText
                     style={{

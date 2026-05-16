@@ -465,11 +465,7 @@ export default function VentasScreen() {
                     }
                   </ThemedText>
 
-                  <ThemedText>
-                    {formatFecha(
-                      v.created_at
-                    )}
-                  </ThemedText>
+                  <ThemedText>{formatFecha(v.created_at)}</ThemedText>
 
                   <ThemedText
                     style={
