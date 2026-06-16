@@ -19,8 +19,10 @@ export interface Product {
   precioVenta: number;
   stock: number;
   activo?: boolean;
+  imagenUrl?: string;
 }
 
+//*esto define nuestras variables de productos para su posterior insert en la BD
 interface ProductContextType {
   productos: Product[];
 
@@ -69,7 +71,7 @@ export const ProductProvider = ({
   const [isLoading, setIsLoading] =
     useState(true);
 
-  /* ================= FETCH ================= */
+//*esto solicita datos de supabase para poder crear las tablas
 
   const fetchProductos = async () => {
     try {
@@ -113,6 +115,9 @@ export const ProductProvider = ({
             p.unidad_medida ||
             'Unidad',
 
+          imagenUrl:
+           p.imagen_url || '',
+
           precioCompra:
             Number(
               p.precio_compra
@@ -141,32 +146,114 @@ export const ProductProvider = ({
     }
   };
 
-  /* ================= EFFECT ================= */
+//* busca la base de datos para poder hacer cambios
 
-  useEffect(() => {
-    fetchProductos();
 
-    const channel = supabase
-      .channel('products-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'products',
-        },
-        () => {
-          fetchProductos();
-        }
-      )
-      .subscribe();
+useEffect(() => {
+  fetchProductos();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const channel = supabase
+    .channel('products-channel')
 
-  /* ================= GENERAR CODIGO ================= */
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'products',
+      },
+      (payload) => {
+        setProductos((prev) => [
+          {
+            id: payload.new.id,
+            nombre: payload.new.nombre || '',
+            categoria:payload.new.categoria || '',
+            descripcion:payload.new.descripcion || '',
+            codigoProducto:payload.new.codigo_producto || '',
+            marca:payload.new.marca || '',
+            unidadMedida:payload.new.unidad_medida ||
+              'Unidad',
+            imagenUrl:payload.new.imagen_url || '',
+
+            precioCompra:
+
+              Number(
+                payload.new.precio_compra
+              ) || 0,
+            precioVenta:
+              Number(
+                payload.new.precio_venta
+              ) || 0,
+            stock:
+              Number(payload.new.stock) || 0,
+            activo:
+              payload.new.activo ?? true,
+          },
+          ...prev,
+        ]);
+      }
+    )
+
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'products',
+      },
+      (payload) => {
+        setProductos((prev) =>
+          prev.map((p) =>
+            p.id === payload.new.id
+              ? {
+                  ...p,
+                  nombre:
+                    payload.new.nombre,
+                  categoria:
+                    payload.new.categoria,
+                  descripcion:
+                    payload.new.descripcion,
+                  codigoProducto:
+                    payload.new.codigo_producto,
+                  marca:
+                    payload.new.marca,
+                  unidadMedida:
+                    payload.new.unidad_medida,
+                  imagenUrl:
+                    payload.new.imagen_url,
+                  precioCompra:
+                  
+                    Number(
+                      payload.new
+                        .precio_compra
+                    ),
+                  precioVenta:
+                    Number(
+                      payload.new
+                        .precio_venta
+                    ),
+                  stock: Number(
+                    payload.new.stock
+                  ),
+                  activo:
+                    payload.new.activo,
+                }
+              : p
+          )
+        );
+      }
+    )
+
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
+
+
+
+//* funcion que crea el codigo unico de producto
 
   const generarCodigoProducto =
     async (
@@ -195,7 +282,7 @@ export const ProductProvider = ({
       ).padStart(3, '0')}`;
     };
 
-  /* ================= AGREGAR ================= */
+//* agregar nuevo producto 
 
   const agregarProducto =
     async (
@@ -242,6 +329,9 @@ export const ProductProvider = ({
 
                 stock:
                   producto.stock,
+                  
+                imagen_url:
+                  producto.imagenUrl,
 
                 activo: true,
               },
@@ -250,19 +340,14 @@ export const ProductProvider = ({
         if (error) {
           throw error;
         }
-
-        await fetchProductos();
       } catch (error) {
-        console.log(
-          'AGREGAR PRODUCTO ERROR:',
-          error
-        );
+
 
         throw error;
       }
     };
 
-  /* ================= ACTUALIZAR ================= */
+//* actualizxar con el boton de edicion
 
   const actualizarProducto =
     async (
@@ -270,6 +355,7 @@ export const ProductProvider = ({
       producto: Partial<Product>
     ) => {
       try {
+        //! para verificar si el producto se envia o no 
         console.log(
           'ACTUALIZANDO PRODUCTO:',
           id,
@@ -306,6 +392,9 @@ export const ProductProvider = ({
 
               stock:
                 producto.stock,
+
+              imagen_url:
+                producto.imagenUrl,
             })
             .eq('id', id);
 
@@ -318,7 +407,7 @@ export const ProductProvider = ({
           throw error;
         }
 
-        await fetchProductos();
+
       } catch (error) {
         console.log(
           'ACTUALIZAR PRODUCTO ERROR:',
@@ -329,7 +418,7 @@ export const ProductProvider = ({
       }
     };
 
-  /* ================= ELIMINAR ================= */
+//* eliminar u ocultar
 
   const eliminarProducto =
     async (id: string) => {
@@ -346,7 +435,7 @@ export const ProductProvider = ({
           throw error;
         }
 
-        await fetchProductos();
+
       } catch (error) {
         console.log(
           'ELIMINAR PRODUCTO ERROR:',
@@ -357,7 +446,7 @@ export const ProductProvider = ({
       }
     };
 
-  /* ================= STOCK ================= */
+//* cantidad
 
   const reducirStock =
     async (
@@ -392,10 +481,10 @@ export const ProductProvider = ({
         throw error;
       }
 
-      await fetchProductos();
+
     };
 
-  /* ================= BUSCAR ================= */
+//* busqueda de productos 
 
   const buscarProductoExistente =
     (nombre: string) => {

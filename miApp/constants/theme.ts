@@ -2,38 +2,54 @@
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
-
+//! con esto manejamos el cambio de color segun la preferencia
 import { Platform } from 'react-native';
-
-// Colores amigables para Tienda de Barrio
-// Verde: Confianza, crecimiento, naturaleza
-// Naranja: Calidez, energía, invitación
-const tintColorLight = '#2ECC71'; // Verde vibrante y moderno
-const tintColorDark = '#27AE60'; // Verde más profundo para dark mode
-const accentColor = '#E67E22'; // Naranja cálido para acentos
+const tintColorLight = '#2ECC71'; 
+const tintColorDark = '#27AE60'; 
+const accentColor = '#E67E22';
 
 export const Colors = {
   light: {
-    text: '#2C3E50', // Gris azulado oscuro (mejor legibilidad)
-    background: '#F8FAFB', // Blanco cálido muy suave
-    tint: tintColorLight,
-    icon: '#95A5A6', // Gris suave
-    tabIconDefault: '#BDC3C7', // Gris claro
-    tabIconSelected: tintColorLight,
-    border: '#E0E6E8', // Borde suave
+  text: '#2C3E50',
+  background: '#F8FAFB',
+  tint: '#2ECC71',
+
+  card: '#FFFFFF',
+  input: '#FFFFFF',
+  border: '#D1D5DB',
+
+  success: '#22C55E',
+  danger: '#EF4444',
+  primary: '#6366F1',
+
+  cardText: '#111827',
+  secondaryText: '#4B5563',
+      
+  tableHeader: '#F3F4F6',
+  footer: '#FFFFFF',
+  buttonSecondary: '#E5E7EB',
   },
   dark: {
-    text: '#ECF0F1', // Blanco cálido suave
-    background: '#1A252F', // Gris azulado oscuro profundo
-    tint: tintColorLight,
-    icon: '#7F8C8D', // Gris medio
-    tabIconDefault: '#34495E', // Gris azulado más oscuro
-    tabIconSelected: tintColorLight,
-    border: '#2C3E50', // Borde más oscuro
+  text: '#ECF0F1',
+  background: '#111827',
+  tint: '#2ECC71',
+
+  card: '#1F2937',
+  input: '#111827',
+  border: '#374151',
+
+  success: '#22C55E',
+  danger: '#EF4444',
+  primary: '#6366F1',
+
+  cardText: '#FFFFFF',
+  secondaryText: '#D1D5DB',
+  tableHeader: '#111827',
+  footer: '#111827',
+  buttonSecondary: '#374151',
   },
 };
 
-// Color de acento para alertas y elementos especiales
 export const AccentColors = {
   success: '#27AE60', // Verde
   error: '#E74C3C', // Rojo cálido

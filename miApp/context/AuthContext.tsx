@@ -1,3 +1,5 @@
+//! esto es nuestra conexion de autentificacion con la base de datos
+
 import React, {
   createContext,
   useContext,
@@ -69,13 +71,18 @@ useEffect(() => {
 
         setSession(session);
 
-        if (session?.user) {
-          await fetchProfile(
-            session.user.id
-          );
-        } else {
-          setUser(null);
-        }
+if (
+  session?.user &&
+  session.user.id !== user?.id
+) {
+  await fetchProfile(
+    session.user.id
+  );
+}
+
+if (!session?.user) {
+  setUser(null);
+}
       } catch (error) {
         console.log(
           'INIT AUTH ERROR:',
@@ -90,31 +97,48 @@ useEffect(() => {
 
   initializeAuth();
 
-  const {
-    data: authListener,
-  } =
-    supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+const {
+  data: authListener,
+} =
+  supabase.auth.onAuthStateChange(
+    async (_event, session) => {
+      try {
         if (!mounted) return;
 
         setSession(session);
 
-        if (session?.user) {
-          await fetchProfile(
-            session.user.id
-          );
-        } else {
-          setUser(null);
+if (
+  session?.user &&
+  session.user.id !== user?.id
+) {
+  await fetchProfile(
+    session.user.id
+  );
+}
+
+if (!session?.user) {
+  setUser(null);
+}
+      } catch (error) {
+        console.log(
+          'AUTH STATE ERROR:',
+          error
+        );
+      } finally {
+        if (mounted) {
+          setLoading(false);
         }
       }
-    );
+    }
+  );
+
 
   return () => {
     mounted = false;
 
     authListener.subscription.unsubscribe();
   };
-}, []);
+}, [user?.id]);
 
   const fetchProfile =
     async (id: string) => {
@@ -124,18 +148,24 @@ useEffect(() => {
             .from('profiles')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) {
-          console.log(
-            'PROFILE ERROR:',
-            error
-          );
+if (error) {
+  console.log(
+    'PROFILE ERROR:',
+    error
+  );
 
-          return;
-        }
+  setUser(null);
+
+  return;
+}
 
         setUser(data);
+        console.log(
+  'PROFILE CARGADO:',
+  data
+);
       } catch (error) {
         console.log(
           'FETCH PROFILE ERROR:',
@@ -174,37 +204,54 @@ const signIn = async (
   }
 };
 
-  const signUp = async (
-    name: string,
-    email: string,
-    password: string,
-    carnet: string
-  ) => {
-    const { data, error } =
-      await supabase.auth.signUp({
-        email,
-        password,
-      });
+const signUp = async (
+  name: string,
+  email: string,
+  password: string,
+  carnet: string
+) => {
+  try {
+    setLoading(true);
 
-    if (error) throw error;
+    const {
+      data,
+      error,
+    } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name.trim(),
+          carnet: carnet.trim(),
+          role: 'user',
+        },
+      },
+    });
 
-    if (data.user) {
-      const { error: profileError } =
-        await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              name,
-              carnet,
-              role: 'user',
-            },
-          ]);
+    if (error) {
+      console.log(
+        'SIGNUP ERROR:',
+        error
+      );
 
-      if (profileError)
-        throw profileError;
+      throw error;
     }
-  };
+
+    console.log(
+      'Usuario registrado:',
+      data.user?.id
+    );
+  } catch (error) {
+    console.log(
+      'REGISTER ERROR:',
+      error
+    );
+
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
 const signOut = async () => {
   try {

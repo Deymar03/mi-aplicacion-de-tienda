@@ -16,7 +16,6 @@ function RootLayoutContent() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="app-modal" />
       </Stack>
 
       <StatusBar style="auto" />

@@ -1,4 +1,4 @@
-//este es el transaction context es para manejar las transacciones en la aplicacion
+//*este es el transaction context es para manejar las transacciones en la aplicacion
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/supabase';
 import { CartItem } from './CartContext';
@@ -61,7 +61,7 @@ export const TransactionProvider = ({
     Transaction[]
   >([]);
 
-  /* ===================== LOAD ===================== */
+  /*  */
 
 const fetchTransactions = async () => {
   const { data, error } = await supabase
@@ -83,7 +83,7 @@ const fetchTransactions = async () => {
   }
 };
 
-  /* ===================== REALTIME ===================== */
+//*este apartado permite que tengamos actualizado los datos de las transacciones
 
   useEffect(() => {
     fetchTransactions();
@@ -93,13 +93,16 @@ const fetchTransactions = async () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'transactions',
         },
-        () => {
-          fetchTransactions();
-        }
+(payload) => {
+  setTransactions((prev) => [
+    payload.new as Transaction,
+    ...prev,
+  ]);
+}
       )
       .subscribe();
 
@@ -108,7 +111,7 @@ const fetchTransactions = async () => {
     };
   }, []);
 
-  /* ===================== INSERT ===================== */
+//* esto registra que usuario hizo una compra 
 
 const registrarTransaccion = async (
   userId: string,
@@ -160,7 +163,7 @@ const registrarTransaccion = async (
   return data as Transaction;
 };
 
-  /* ===================== GETTERS ===================== */
+//* recolecta los datos pertinentes para su posterior reporte
 
   const obtenerTodasTransacciones = () =>
     transactions;

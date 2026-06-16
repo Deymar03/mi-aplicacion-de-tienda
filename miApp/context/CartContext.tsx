@@ -1,4 +1,4 @@
-//este es el cart context es para manejar el carrito de compras en la aplicacion
+//!esto nos ayuda a manejar de manera mas eficiente el carrito aqui se almacena tipo de fato para agregar o quitar
 import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from './ProductContext';
@@ -6,7 +6,7 @@ import { Product } from './ProductContext';
 export interface CartItem {
   producto: Product;
   cantidad: number;
-  precioUnitario: number; // Precio al que se agregó
+  precioUnitario: number;
 }
 
 export interface CartContextType {
@@ -36,8 +36,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
       
+      
       return [...prevItems, { producto, cantidad, precioUnitario: producto.precioVenta }];
     });
+    
   };
 
   const removerDelCarrito = (productoId: string) => {
