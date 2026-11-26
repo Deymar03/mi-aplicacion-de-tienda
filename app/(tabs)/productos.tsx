@@ -574,7 +574,7 @@ const confirmarEliminar = (
   >
     <ThemedText
       style={[
-        styles.categoryText,
+        styles.toggleText,
         {
           color: !selectedCategory
             ? colors.primaryText
@@ -604,7 +604,7 @@ const confirmarEliminar = (
       >
         <ThemedText
           style={[
-            styles.categoryText,
+            styles.toggleText,
             {
               color: isSelected
                 ? colors.primaryText

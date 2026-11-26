@@ -1,8 +1,7 @@
 import { ThemedView } from '@/components/themed-view';
 import { TabHeader } from '@/components/tab-header';
 import { ThemedText } from '@/components/themed-text';
-import { Dimensions } from 'react-native';
-import {  LineChart,} from 'react-native-chart-kit';
+import { ResumenReportes } from '@/components/reportes-resumen';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import {  StyleSheet,  ScrollView,  View,  TouchableOpacity,  Alert,  Image,  TextInput,  Platform,} from 'react-native';
@@ -435,24 +434,6 @@ if (Platform.OS === 'web') {
   );
 }, [ventasOrdenadas]);
     
-// Ventas agrupadas por día (últimos 7 días con ventas) para el gráfico.
-const chartData = useMemo(() => {
-  const porDia = new Map<string, number>();
-
-  [...ventasOrdenadas].reverse().forEach((v: any) => {
-    const f = new Date(v.created_at);
-    const dia = `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}`;
-    porDia.set(dia, (porDia.get(dia) ?? 0) + Number(v.total));
-  });
-
-  const entradas = Array.from(porDia.entries()).slice(-7);
-
-  return {
-    labels: entradas.map(([dia]) => dia),
-    datasets: [{ data: entradas.map(([, monto]) => monto) }],
-  };
-}, [ventasOrdenadas]);
-
 //* carrito usuario
 
   const confirmarCompra = async (metodo: string) => {
@@ -1249,106 +1230,12 @@ return (
   showsVerticalScrollIndicator={true}
 >
         <View>
-          <ThemedText
-            style={styles.bigTitle}
-          >
-            Reportes de ventas
-          </ThemedText>
-
-<View style={styles.dashboardRow}>
-
-  <View style={[styles.dashboardCard,{backgroundColor: colors.card,      borderColor: colors.border,
-      borderWidth: 1,}]}>
-    <ThemedText style={[styles.dashboardTitle,{ color: colors.secondaryText },]}>
-      Ingresos Totales
-    </ThemedText>
-
-    <ThemedText style={[styles.dashboardAmount,{ color: colors.price },]}>
-      Bs. {totalVentas.toFixed(2)}
-    </ThemedText>
-  </View>
-
-  <View style={[styles.dashboardCard,{backgroundColor: colors.card,       borderColor: colors.border,
-      borderWidth: 1,}]}>
-    <ThemedText style={[styles.dashboardTitle,{ color: colors.secondaryText },]}>
-      Ganancia Real
-    </ThemedText>
-
-    <ThemedText style={[styles.dashboardAmount,{ color: colors.profit},]}>
-      Bs. {gananciaReal.toFixed(2)}
-    </ThemedText>
-  </View>
-
-</View>
-
-<View  style={[styles.chartContainer,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  borderWidth: 1,
-                },
-              ]}>
-
-  <ThemedText
-    style={styles.chartTitle}
-  >
-    Ventas por día (últimos 7 días con ventas)
-  </ThemedText>
-
-  {chartData.labels.length >= 2 ? (
-    <LineChart
-      data={chartData}
-
-      width={
-        Dimensions.get(
-          'window'
-        ).width - 40
-      }
-
-      height={220}
-
-      yAxisSuffix=" Bs"
-
-      chartConfig={{
-  backgroundColor: colors.card,
-  backgroundGradientFrom: colors.card,
-  backgroundGradientTo: colors.background,
-
-  decimalPlaces: 0,
-
-  color: (opacity = 1) =>
-    colorScheme === 'dark'
-      ? `rgba(74,222,128,${opacity})`
-      : `rgba(21,128,61,${opacity})`,
-
-  labelColor: (opacity = 1) =>
-    colorScheme === 'dark'
-      ? `rgba(248,250,252,${opacity})`
-      : `rgba(23,33,43,${opacity})`,
-
-  propsForDots: {
-    r: '5',
-  },
-
-  propsForBackgroundLines: {
-    stroke: colors.border,
-  },
-}}
-
-      bezier
-
-      style={{
-        marginTop: 10,
-        borderRadius: 16,
-      }}
-    />
-  ) : (
-    <ThemedText style={{ opacity: 0.7, marginTop: 10 }}>
-      Se necesitan ventas en al menos 2 días distintos para mostrar el gráfico.
-    </ThemedText>
-  )}
-
-</View>
+          <ResumenReportes
+  ventas={ventasOrdenadas}
+  totalIngresos={totalVentas}
+  gananciaReal={gananciaReal}
+  filtrado={!!(buscarCarnet || buscarRecibo || fechaInicio || fechaFin)}
+/>
 
 <View style={styles.searchRow}>
 
