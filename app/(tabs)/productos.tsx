@@ -545,7 +545,7 @@ const confirmarEliminar = (
           value={search}
           onChangeText={setSearch}
           style={[styles.input,{
-                color: colors.primaryText,
+                color: colors.text,
                 borderColor: colors.border,
                 backgroundColor: colors.card ,
               },
@@ -652,7 +652,7 @@ const confirmarEliminar = (
                   value={nombre}
                   onChangeText={setNombre}
                    style={[styles.input,{
-                        color: colors.primaryText,
+                        color: colors.text,
                         borderColor: colors.border,
                         backgroundColor:colors.card,
                         },
@@ -665,7 +665,7 @@ const confirmarEliminar = (
                   value={codigoProducto}
                   editable={false}
                    style={[styles.input,{
-                      color: colors.primaryText,
+                      color: colors.text,
                       borderColor: colors.border,
                       backgroundColor:colors.card,
                     },
@@ -678,7 +678,7 @@ const confirmarEliminar = (
             value={marca}
             onChangeText={setMarca}
             style={[styles.input,{
-              color: colors.primaryText,
+              color: colors.text,
               borderColor: colors.border,
               backgroundColor:colors.card,
             },
@@ -693,7 +693,7 @@ const confirmarEliminar = (
               setUnidadMedida
             }
             style={[styles.input,{
-              color: colors.primaryText,
+              color: colors.text,
               borderColor: colors.border,
               backgroundColor:colors.card,
             },
@@ -737,7 +737,7 @@ const confirmarEliminar = (
                   }
                   style={[ styles.input, {
                       height:90,
-                      color: colors.primaryText,
+                      color: colors.text,
                       marginTop:8,
                       borderColor: colors.border,
                       backgroundColor:colors.card,
@@ -776,7 +776,7 @@ const confirmarEliminar = (
                     setPrecioCompra
                   }
                    style={[styles.input, {
-                        color: colors.primaryText,
+                        color: colors.text,
                         borderColor: colors.border,
                         backgroundColor:colors.card,
                       },
@@ -792,7 +792,7 @@ const confirmarEliminar = (
                     setPrecioVenta
                   }
                    style={[styles.input,{
-                        color: colors.primaryText,
+                        color: colors.text,
                         borderColor: colors.border,
                         backgroundColor:
                           colors.card,
@@ -809,7 +809,7 @@ const confirmarEliminar = (
                     setStock
                   }
                    style={[styles.input,{
-                        color: colors.primaryText,
+                        color: colors.text,
                         borderColor: colors.border,
                         backgroundColor:colors.card,
                       },
@@ -1036,7 +1036,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                color: colors.primaryText,
+                color: colors.text,
                 borderColor: colors.border,
                 backgroundColor:colors.card,},
                ]}
@@ -1051,7 +1051,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:
                       colors.card,
@@ -1087,7 +1087,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card,
                   },
@@ -1103,7 +1103,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card,
                   },
@@ -1119,7 +1119,7 @@ const confirmarEliminar = (
       <TextInput
          style={[styles.input,
                   {
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card,
                   },
@@ -1136,7 +1136,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card,
                   },
@@ -1153,7 +1153,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card,
                   },
@@ -1170,7 +1170,7 @@ const confirmarEliminar = (
       </ThemedText>
       <TextInput
          style={[styles.input,{
-                    color: colors.primaryText,
+                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor:colors.card ,
                   },

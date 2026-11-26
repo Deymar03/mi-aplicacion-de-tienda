@@ -16,6 +16,7 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const linkColor = useThemeColor({}, 'primary');
 
   return (
     <Text
@@ -33,10 +34,6 @@ export function ThemedText({
   );
 }
 
-const linkColor = useThemeColor(
-  { light: undefined, dark: undefined },
-  'primary'
-);
 
 const styles = StyleSheet.create({
   default: {
