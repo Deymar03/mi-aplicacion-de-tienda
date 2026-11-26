@@ -541,11 +541,7 @@ const confirmarEliminar = (
         {/* label de buscar productos */}
         <TextInput
           placeholder="Buscar producto..."
-          placeholderTextColor={
-          colorScheme === 'dark'
-          ? '#9CA3AF'
-          : '#6B7280'
-          }
+          placeholderTextColor={colors.mutedText          }
           value={search}
           onChangeText={setSearch}
           style={[styles.input,{
@@ -604,7 +600,7 @@ const confirmarEliminar = (
             style={styles.formContainer}
           >
             <TouchableOpacity
-              style={styles.toggleBtn}
+              style={[styles.toggleBtn,{ backgroundColor: colors.primary },]}
               onPress={() =>
                 setShowForm(!showForm)
               }
@@ -626,7 +622,7 @@ const confirmarEliminar = (
 
                 <TextInput
                   placeholder="Nombre producto"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={nombre}
                   onChangeText={setNombre}
                    style={[styles.input,{
@@ -639,7 +635,7 @@ const confirmarEliminar = (
 
                 <TextInput
                   placeholder="Código automático"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={codigoProducto}
                   editable={false}
                    style={[styles.input,{
@@ -652,7 +648,7 @@ const confirmarEliminar = (
 
           <TextInput
             placeholder="Marca"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.mutedText}
             value={marca}
             onChangeText={setMarca}
             style={[styles.input,{
@@ -665,7 +661,7 @@ const confirmarEliminar = (
 
           <TextInput
             placeholder="Unidad medida"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.mutedText}
             value={unidadMedida}
             onChangeText={
               setUnidadMedida
@@ -679,11 +675,11 @@ const confirmarEliminar = (
             />
 
             <TouchableOpacity
-              style={styles.addBtn}
+              style={[styles.addBtn,{ backgroundColor: colors.actionSuccess },]}
               onPress={seleccionarImagen}
             >
               <ThemedText
-                style={{color: colors.text,}}
+                style={{color: colors.actionText,}}
               >
                 Seleccionar imagen
               </ThemedText>
@@ -705,7 +701,7 @@ const confirmarEliminar = (
             }
                 <TextInput
                   placeholder="Descripción"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={descripcion}
                   onChangeText={
                     setDescripcion
@@ -745,7 +741,7 @@ const confirmarEliminar = (
 
                 <TextInput
                   placeholder="Precio compra"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={precioCompra}
                   onChangeText={
                     setPrecioCompra
@@ -761,7 +757,7 @@ const confirmarEliminar = (
 
                 <TextInput
                   placeholder="Precio venta"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={precioVenta}
                   onChangeText={
                     setPrecioVenta
@@ -778,7 +774,7 @@ const confirmarEliminar = (
 
                 <TextInput
                   placeholder="Cantidad"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor={colors.mutedText}
                   value={stock}
                   onChangeText={
                     setStock
@@ -793,14 +789,17 @@ const confirmarEliminar = (
                 />
 
                 <TouchableOpacity
-                  style={styles.addBtn}
+                  style={[
+                    styles.addBtn,
+                    { backgroundColor: colors.actionSuccess },
+                  ]}
                   disabled={guardando}
                   onPress={handleAgregar}
                 >
                   <ThemedText
-                    style={{color:colors.text,}}
+                    style={{ color: colors.actionText }}
                   >
-                    Guardar producto
+                    {guardando ? 'Guardando...' : 'Guardar producto'}
                   </ThemedText>
                 </TouchableOpacity>
               </View>
@@ -860,7 +859,7 @@ const confirmarEliminar = (
           <View style={{ marginTop: 6 }}>
 
             <ThemedText
-              style={styles.ganancia}
+               style={[styles.ganancia,{ color: colors.profit },]}
             >
               Ganancia/unidad: Bs.{' '}
               {
@@ -882,7 +881,7 @@ const confirmarEliminar = (
               </ThemedText>
           
                 <ThemedText
-              style={styles.productCompra}
+              style={[styles.price,{ color: colors.price },]}
             >
               precio de Compra: Bs.{' '}
               {Number(producto.precioCompra).toFixed(2)}
@@ -895,37 +894,59 @@ const confirmarEliminar = (
                   {Number(producto.precioVenta).toFixed(2)}
                 </ThemedText>
 
-                <ThemedText
-                  style={{
-                    fontSize: 13,
-                    marginTop: 2,
-                    color: producto.stock <= 5 ? colors.danger : colors.secondaryText,
-                  }}
-                >
-                  Stock: {producto.stock}
-                  {producto.stock <= 5 ? '  ⚠️ stock bajo' : ''}
-                </ThemedText>
-              </View>
+               <View
+                    style={{
+                      marginTop: 6,
+                      alignSelf: 'flex-start',
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                      backgroundColor:
+                        producto.stock <= 5
+                          ? colors.stockLowBackground
+                          : colors.tableHeader,
+                    }}
+                  >
+                  <ThemedText
+                    style={{
+                      fontSize: 13,
+                      fontWeight: producto.stock <= 5 ? '700' : '400',
+                      color:
+                        producto.stock <= 5
+                          ? colors.stockLow
+                          : colors.secondaryText,
+                    }}
+                  >
+                    Stock: {producto.stock}
+                    {producto.stock <= 10 ? ' · Stock bajo' : ''}
+                  </ThemedText>
+                </View>
+        </View>
 
 
               {user?.role ===
               'admin' ? (
                 <View style={{gap: 15,}} >
                   <TouchableOpacity
-                    style={styles.editBtn}
-                    onPress={() =>handleEditar(producto)}>
-                    <ThemedText style={{color:colors.text, }} >
+                    style={[
+                      styles.editBtn,
+                      { backgroundColor: colors.actionInfo },
+                    ]}
+                    onPress={() => handleEditar(producto)}
+                  >
+                    <ThemedText style={{ color: colors.actionText }}>
                       Editar
                     </ThemedText>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={styles.deleteBtn}
-                    onPress={() =>confirmarEliminar(producto.id)}
+                    style={[
+                      styles.deleteBtn,
+                      { backgroundColor: colors.actionDanger },
+                    ]}
+                    onPress={() => confirmarEliminar(producto.id)}
                   >
-                    <ThemedText
-                      style={{color:colors.text,}}
-                    >
+                    <ThemedText style={{ color: colors.actionText }}>
                       Eliminar
                     </ThemedText>
                   </TouchableOpacity>
@@ -984,7 +1005,7 @@ const confirmarEliminar = (
           value={editNombre}
           onChangeText={setEditNombre}
           placeholder="Nombre"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
         />
 
       <ThemedText style={[styles.toggleText,{color:colors.text}]}>
@@ -1001,7 +1022,7 @@ const confirmarEliminar = (
           value={editDescripcion}
           onChangeText={setEditDescripcion}
           placeholder="Descripción"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
           multiline
         />
 
@@ -1036,7 +1057,7 @@ const confirmarEliminar = (
         value={editCodigo}
         editable={false}
         placeholder="Código"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colors.mutedText}
       />
 
       <ThemedText style={[styles.toggleText,{color:colors.text}]}>
@@ -1052,7 +1073,7 @@ const confirmarEliminar = (
           value={editMarca}
           onChangeText={setEditMarca}
           placeholder="Marca"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
         />
       <ThemedText style={[styles.toggleText,{color:colors.text}]}>
         unidad de medida
@@ -1068,7 +1089,7 @@ const confirmarEliminar = (
             value={editUnidadMedida}
             onChangeText={setEditUnidadMedida}
             placeholder="Unidad de medida"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.mutedText}
           />
 
 
@@ -1086,7 +1107,7 @@ const confirmarEliminar = (
           onChangeText={setEditCompra}
           keyboardType="numeric"
           placeholder="Precio compra"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
         />
 
       <ThemedText style={[styles.toggleText,{color:colors.text}]}>
@@ -1103,7 +1124,7 @@ const confirmarEliminar = (
           onChangeText={setEditVenta}
           keyboardType="numeric"
           placeholder="Precio venta"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
         />
 
       <ThemedText style={[styles.toggleText,{color:colors.text}]}>
@@ -1120,18 +1141,19 @@ const confirmarEliminar = (
           onChangeText={setEditStock}
           keyboardType="numeric"
           placeholder="cantidad"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.mutedText}
         />
 
       <View style={styles.modalButtons}>
 
         <TouchableOpacity
-          style={styles.saveBtn}
+          style={[
+            styles.saveBtn,
+            { backgroundColor: colors.actionSuccess },
+          ]}
           onPress={guardarEdicion}
         >
-          <ThemedText
-            style={{ color: colors.text }}
-          >
+          <ThemedText style={{ color: colors.actionText }}>
             Guardar
           </ThemedText>
         </TouchableOpacity>
@@ -1279,14 +1301,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     padding: 12,
     borderRadius: 12,
-    
   },
 
   input: {
-  borderWidth: 1,
-  padding: 8,
-  borderRadius: 8,
-  marginBottom: 8,
+    borderWidth: 1,
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
   },
 
   categorias: {
@@ -1297,26 +1318,25 @@ const styles = StyleSheet.create({
   },
 
   catBtn: {
-  padding: 8,
-  borderRadius: 8,
-  borderWidth: 1,
-  marginRight: 6,
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginRight: 6,
   },
 
   addBtn: {
-    backgroundColor: '#22c55e',
     padding: 10,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop:5,
+    marginTop: 5,
   },
 
   toggleBtn: {
-    backgroundColor: '#2563eb',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 10,
+    
   },
 
   toggleText: {
@@ -1324,10 +1344,10 @@ const styles = StyleSheet.create({
   },
 
   productCard: {
-  width: '48%',
-  padding: 12,
-  borderRadius: 12,
-  marginBottom: 10,
+    width: '48%',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 10,
   },
 
   productName: {
@@ -1338,66 +1358,58 @@ const styles = StyleSheet.create({
   productInfo: {
     marginTop: 2,
   },
-productCompra:{
-  color:'#e2e91e',
+
+  productCompra: {
     fontWeight: '700',
     marginTop: 5,
+  },
 
-},
   price: {
-  color: '#22c55e',
-  fontWeight: 'bold',
-  fontSize: 18,
-  marginTop: 8,
-  gap:5,
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginTop: 8,
   },
 
   editBtn: {
-    backgroundColor: '#3b82f6',
     padding: 15,
-    marginTop:8,
+    marginTop: 8,
     borderRadius: 15,
     alignItems: 'center',
   },
 
   deleteBtn: {
-    backgroundColor: '#ef4444',
     padding: 15,
     borderRadius: 15,
     alignItems: 'center',
   },
 
   modalOverlay: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+    elevation: 10,
+    paddingHorizontal: 15,
+  },
 
-  backgroundColor: 'rgba(0,0,0,0.7)',
-
-  justifyContent: 'center',
-  alignItems: 'center',
-
-  zIndex: 999,
-  elevation: 10,
-
-  paddingHorizontal: 15,
-},
-
-modalContent: {
-  width: '100%',
-  maxWidth: 400,
-  borderRadius: 14,
-  padding: 20,
-  maxHeight: '85%',
-},
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 14,
+    padding: 20,
+    maxHeight: '85%',
+  },
 
   modalTitle: {
-  fontSize: 18,
-  fontWeight: '700',
-  marginBottom: 15,
-  textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 15,
+    textAlign: 'center',
   },
 
   modalButtons: {
@@ -1408,7 +1420,6 @@ modalContent: {
 
   saveBtn: {
     flex: 1,
-    backgroundColor: '#22c55e',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -1417,7 +1428,6 @@ modalContent: {
 
   cancelBtn: {
     flex: 1,
-    backgroundColor: '#ef4444',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -1425,25 +1435,24 @@ modalContent: {
   },
 
   ganancia: {
-  color: '#d63a1f',
-  fontWeight: '700',
-  marginTop: 4,
-},
+    fontWeight: '700',
+    marginTop: 4,
+  },
 
-gananciaVendida: {
-  color: '#dba40e',
-  fontWeight: '700',
-  marginTop: 4,
-},
-productGrid: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
-},
-viewBtn: {
-  backgroundColor: '#6366f1',
-  padding: 10,
-  borderRadius: 10,
-  alignItems: 'center',
-},
-});
+  gananciaVendida: {
+    fontWeight: '700',
+    marginTop: 4,
+  },
+
+  productGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+
+  viewBtn: {
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+});

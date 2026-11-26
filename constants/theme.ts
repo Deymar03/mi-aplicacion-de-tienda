@@ -2,69 +2,124 @@
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
-//! con esto manejamos el cambio de color segun la preferencia
+
 import { Platform } from 'react-native';
-const accentColor = '#E67E22';
 
 export const Colors = {
   light: {
-  text: '#2C3E50',
-  background: '#F8FAFB',
-  tint: '#2ECC71',
+    // Superficies
+    background: '#F5F7FA',
+    card: '#FFFFFF',
+    input: '#FFFFFF',
+    footer: '#FFFFFF',
+    tableHeader: '#EEF2F6',
+    buttonSecondary: '#E8EEF5',
 
-  card: '#FFFFFF',
-  input: '#FFFFFF',
-  border: '#D1D5DB',
+    // Texto
+    text: '#17212B',
+    cardText: '#17212B',
+    secondaryText: '#526171',
+    mutedText: '#64748B',
 
-  success: '#22C55E',
-  danger: '#EF4444',
-  primary: '#6366F1',
+    // Marca y navegación
+    tint: '#15803D',
+    primary: '#1D4ED8',
+    primaryText: '#FFFFFF',
+    tabIconDefault: '#64748B',
 
-  cardText: '#111827',
-  secondaryText: '#4B5563',
-  tabIconDefault: '#9CA3AF',
-  tableHeader: '#F3F4F6',
-  footer: '#FFFFFF',
-  buttonSecondary: '#E5E7EB',
+    // Bordes
+    border: '#D8E0E8',
+
+    // Estados
+    success: '#166534',
+    successBackground: '#DCFCE7',
+
+    danger: '#B91C1C',
+    dangerBackground: '#FEE2E2',
+
+    warning: '#92400E',
+    warningBackground: '#FEF3C7',
+
+    info: '#1D4ED8',
+    infoBackground: '#DBEAFE',
+
+    // Valores comerciales
+    price: '#166534',
+    profit: '#047857',
+    stockLow: '#92400E',
+    stockLowBackground: '#FEF3C7',
+
+    // Acciones
+    actionSuccess: '#15803D',
+actionDanger: '#B91C1C',
+actionInfo: '#1D4ED8',
+    actionText: '#FFFFFF',
+    
   },
 
   dark: {
-  text: '#ECF0F1',
-  background: '#111827',
-  tint: '#2ECC71',
-  tabIconDefault: '#6B7280',
-  card: '#1F2937',
-  input: '#111827',
-  border: '#374151',
+    // Superficies
+    background: '#0F172A',
+    card: '#1E293B',
+    input: '#172235',
+    footer: '#172235',
+    tableHeader: '#172235',
+    buttonSecondary: '#334155',
 
-  success: '#22C55E',
-  danger: '#EF4444',
-  primary: '#6366F1',
+    // Texto
+    text: '#F8FAFC',
+    cardText: '#F8FAFC',
+    secondaryText: '#CBD5E1',
+    mutedText: '#94A3B8',
 
-  cardText: '#FFFFFF',
-  secondaryText: '#D1D5DB',
-  tableHeader: '#111827',
-  footer: '#111827',
-  buttonSecondary: '#374151',
+    // Marca y navegación
+    tint: '#4ADE80',
+    primary: '#60A5FA',
+    primaryText: '#0F172A',
+    tabIconDefault: '#94A3B8',
+
+    // Bordes
+    border: '#334155',
+
+    // Estados
+    success: '#4ADE80',
+    successBackground: '#14532D',
+
+    danger: '#F87171',
+    dangerBackground: '#451A1A',
+
+    warning: '#FDE68A',
+    warningBackground: '#451A03',
+
+    info: '#60A5FA',
+    infoBackground: '#172554',
+
+    // Valores comerciales
+    price: '#4ADE80',
+    profit: '#34D399',
+    stockLow: '#FDE68A',
+    stockLowBackground: '#451A03',
+
+    // Acciones
+    actionSuccess: '#166534',
+    actionDanger: '#B91C1C',
+    actionInfo: '#1D4ED8',
+    actionText: '#FFFFFF',
   },
 };
 
 export const AccentColors = {
-  success: '#27AE60', 
-  error: '#E74C3C', 
-  warning: accentColor, 
-  info: '#3498DB', 
+  success: '#15803D',
+  error: '#B91C1C',
+  warning: '#92400E',
+  info: '#1D4ED8',
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
