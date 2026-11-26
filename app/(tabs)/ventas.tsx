@@ -499,7 +499,12 @@ if (reciboDetalle) {
       <TabHeader title="Detalle recibo" />
 
       <ScrollView
-        contentContainerStyle={styles.contentContainer}
+          style={{ flex: 1 }}
+  contentContainerStyle={{
+    padding: 12,
+    paddingBottom: items.length > 0 ? 300 : 30,
+  }}
+  showsVerticalScrollIndicator={false}
       >
         <View style={styles.factura}>
           <ThemedText type="title">
@@ -607,8 +612,9 @@ if (reciboDetalle) {
           <TouchableOpacity
             style={[
               styles.btn,{
-                backgroundColor:'#22c55e',
+                backgroundColor:colors.actionSuccess,
                 marginTop: 15,
+                
               },
             ]}
 onPress={() =>
@@ -627,7 +633,7 @@ onPress={() =>
 }
           >
             <ThemedText
-              style={{color: colors.text,}}
+              style={{color: colors.primaryText,}}
             >
               Imprimir PDF
             </ThemedText>
@@ -638,7 +644,7 @@ onPress={() =>
             style={[
               styles.btn,
               {
-                backgroundColor:'#ef4444',
+                backgroundColor: colors.actionDanger,
                 marginTop: 10,
               },
             ]}
@@ -648,7 +654,7 @@ onPress={() =>
           >
             <ThemedText
               style={{
-                color: colors.text,
+                color: colors.primaryText,
               }}
             >
               Cerrar
@@ -672,11 +678,11 @@ onPress={() =>
       >
         <TabHeader title="RECIBO DIGITAL" />
 
-        <ScrollView
-  contentContainerStyle={
-    styles.contentContainer
-  }
-  keyboardShouldPersistTaps="handled"
+        <ScrollView   style={{ flex: 1 }}
+  contentContainerStyle={{
+    padding: 12,
+    paddingBottom: items.length > 0 ? 300 : 30,
+  }}
   showsVerticalScrollIndicator={false}
         >
           <View style={styles.factura}>
@@ -785,7 +791,7 @@ onPress={() =>
               style={[
                 styles.btn,
                 {
-                  backgroundColor:colors.tint,
+                  backgroundColor:colors.actionDanger,
                 },
               ]}
               onPress={() =>
@@ -796,7 +802,7 @@ onPress={() =>
             >
               <ThemedText
                 style={{
-                  color: colors.text,
+                  color: colors.primaryText,
                 }}
               >
                 Cerrar
@@ -806,7 +812,7 @@ onPress={() =>
   style={[
     styles.btn,
     {
-      backgroundColor:'#2563eb',
+      backgroundColor:colors.actionSuccess,
       marginTop: 10,
     },
   ]}
@@ -814,7 +820,7 @@ onPress={() =>
 >
   <ThemedText
     style={{
-      color: colors.text,
+      color: colors.primaryText,
     }}
   >
     Imprimir / Compartir PDF
@@ -839,415 +845,409 @@ return (
     />
 
 {/* esto es lo que ve el cliente */}
-    {user?.role !== 'admin' ? (
-      <>
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            padding: 12,
-            paddingBottom: 220,
-          }}
-          showsVerticalScrollIndicator={
-            false
-          }
-        >
-          <ThemedText
-            style={styles.bigTitle}
-          >
-            Mi carrito
-          </ThemedText>
 
-          {items.length === 0 ? (
-            <ThemedText>
-              No tienes productos reservados
-            </ThemedText>
-          ) : (
-            items.map((item: any) => (
+{/* esto es lo que ve el cliente */}
+{user?.role !== 'admin' ? (
+  <>
+    <ScrollView
+      style={[
+        { flex: 1, minHeight: 0 },
+        Platform.OS === 'web' && ({
+          overflowY: 'auto',
+          touchAction: 'pan-y',
+          overscrollBehaviorY: 'contain',
+        } as any),
+      ]}
+      contentContainerStyle={{
+        padding: 12,
+        paddingBottom: items.length > 0 ? 320 : 30,
+        flexGrow: 1,
+      }}
+      showsVerticalScrollIndicator={true}
+    >
+      <ThemedText
+        style={[
+          styles.bigTitle,
+          { color: colors.text },
+        ]}
+      >
+        Mi carrito
+      </ThemedText>
+
+      {items.length === 0 ? (
+        <ThemedText>
+          No tienes productos reservados
+        </ThemedText>
+      ) : (
+        <View style={styles.clientGrid}>
+          {items.map((item: any) => (
+            <View
+              key={item.producto.id}
+              style={[
+                styles.ticket,
+                styles.clientGridItem,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                },
+              ]}
+            >
+              <ThemedText style={{ color: colors.text }}>
+                {item.producto.nombre}
+              </ThemedText>
+
+              <ThemedText style={{ color: colors.text }}>
+                Precio: Bs. {item.producto.precioVenta}
+              </ThemedText>
+
+              <ThemedText style={{ color: colors.secondaryText }}>
+                Cantidad disponible: {item.producto.stock}
+              </ThemedText>
+
+              {/* Cantidad de productos */}
               <View
-                key={item.producto.id}
-                style={[styles.ticket,{backgroundColor:colors.card}]}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 10,
+                  gap: 10,
+                }}
               >
-                <ThemedText>
-                  {
-                    item.producto.nombre
-                  }
-                </ThemedText>
-
-                <ThemedText>
-                  Precio: Bs.
-                  {
-                    item.producto
-                      .precioVenta
-                  }
-                </ThemedText>
-
-                <ThemedText>
-                  cantidad disponible:
-                  {
-                    item.producto
-                      .stock
-                  }
-                </ThemedText>
-
-{/* cantidad de productos */}
-                <View
-                  style={{
-                    flexDirection:'row',
-                    alignItems:'center',
-                    marginTop: 10,
-                    gap: 10,
-                  }}
-                >
-                  <TouchableOpacity
-                    style={styles.btnCantidad}
-                    onPress={() =>
-                      cambiarCantidad(
-                        item.producto.id,
-                        item.cantidad -
-                          1
-                      )
-                    }
-                  >
-                    <ThemedText
-                      style={{
-                        color:colors.text,
-                      }}
-                    >
-                      -
-                    </ThemedText>
-                  </TouchableOpacity>
-
-                  <TextInput
-                    value={String(
-                      item.cantidad
-                    )}
-                    onChangeText={(
-                      text
-                    ) => {
-                      const cantidad =
-                        Number(
-                          text
-                        );
-
-                      if (text.trim() !== '' && !isNaN(cantidad)) {
-                        cambiarCantidad(
-                          item
-                            .producto
-                            .id,
-                          cantidad
-                        );
-                      }
-                    }}
-                    keyboardType="numeric"
-                    style={[
-                      styles.inputCantidad,{color:colors.text}
-                    ]}
-                  />
-
-                  <TouchableOpacity
-                    style={
-                      styles.btnCantidad
-                    }
-                    onPress={() =>
-                      cambiarCantidad(
-                        item.producto.id,
-                        item.cantidad +
-                          1
-                      )
-                    }
-                  >
-                    <ThemedText
-                      style={{
-                        color:
-                          colors.text,
-                      }}
-                    >
-                      +
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
-
-                <ThemedText
-                  style={{
-                    marginTop: 10,
-                    fontWeight:
-                      '700',
-                  }}
-                >
-                  Subtotal: Bs.
-                  {(
-                    item.producto.precioVenta *
-                    item.cantidad
-                  ).toFixed(2)}
-                </ThemedText>
-
                 <TouchableOpacity
                   style={[
-                    styles.btn,
+                    styles.btnCantidad,
                     {
-                      backgroundColor:
-                        '#ef4444',
-                      marginTop: 10,
+                      backgroundColor: colors.buttonSecondary,
+                      borderWidth: 1,
+                      borderColor: colors.border,
                     },
                   ]}
                   onPress={() =>
-                    removerDelCarrito(
-                      item.producto.id
+                    cambiarCantidad(
+                      item.producto.id,
+                      item.cantidad - 1
                     )
                   }
                 >
-                  <ThemedText
-                    style={{
-                      color:
-                        colors.text,
-                    }}
-                  >
-                    Quitar
+                  <ThemedText style={{ color: colors.text }}>
+                    -
+                  </ThemedText>
+                </TouchableOpacity>
+
+                <TextInput
+                  value={String(item.cantidad)}
+                  onChangeText={(text) => {
+                    const cantidad = Number(text);
+
+                    if (text.trim() !== '' && !isNaN(cantidad)) {
+                      cambiarCantidad(
+                        item.producto.id,
+                        cantidad
+                      );
+                    }
+                  }}
+                  keyboardType="numeric"
+                  style={[
+                    styles.inputCantidad,
+                    {
+                      backgroundColor: colors.input,
+                      borderColor: colors.border,
+                      color: colors.text,
+                    },
+                  ]}
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.btnCantidad,
+                    {
+                      backgroundColor: colors.buttonSecondary,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  onPress={() =>
+                    cambiarCantidad(
+                      item.producto.id,
+                      item.cantidad + 1
+                    )
+                  }
+                >
+                  <ThemedText style={{ color: colors.text }}>
+                    +
                   </ThemedText>
                 </TouchableOpacity>
               </View>
-            ))
-          )}
-        </ScrollView>
 
-{/* pie de pagina donde aparece el metodo de pago */}
-        {items.length > 0 && (
-          <View
-            style={[styles.footerPago,{backgroundColor: colors.footer,borderTopColor: colors.border}]}
+              <ThemedText
+                style={{
+                  marginTop: 10,
+                  fontWeight: '700',
+                  color: colors.price,
+                }}
+              >
+                Subtotal: Bs.{' '}
+                {(item.producto.precioVenta * item.cantidad).toFixed(2)}
+              </ThemedText>
+
+              <TouchableOpacity
+                style={[
+                  styles.btn,
+                  {
+                    backgroundColor: colors.actionDanger,
+                    marginTop: 10,
+                  },
+                ]}
+                onPress={() =>
+                  removerDelCarrito(item.producto.id)
+                }
+              >
+                <ThemedText style={{ color: colors.primaryText }}>
+                  Quitar
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Historial de compras del cliente */}
+      <View
+        style={{
+          marginTop: 15,
+          paddingBottom: 20,
+        }}
+      >
+        <TouchableOpacity
+          style={[
+            styles.accordionBtn,
+            {
+              backgroundColor: colors.tableHeader,
+              borderWidth: 1,
+              borderColor: colors.border,
+            },
+          ]}
+          onPress={() => setHistorialVisible(!historialVisible)}
+        >
+          <ThemedText
+            style={[
+              styles.accordionText,
+              { color: colors.text },
+            ]}
           >
-            <ThemedText
-              style={styles.total}
-            >
-              TOTAL: Bs. {Number(total).toFixed(2)}
-            </ThemedText>
+            {historialVisible ? '▼' : '▶'} Mi historial de compras
+          </ThemedText>
+        </TouchableOpacity>
 
+        {historialVisible && (
+          <>
+            {ventasOrdenadas.length === 0 ? (
+              <ThemedText
+                style={{
+                  color: colors.secondaryText,
+                  textAlign: 'center',
+                  marginTop: 15,
+                }}
+              >
+                Todavía no tienes compras registradas.
+              </ThemedText>
+            ) : (
+              <View style={styles.clientGrid}>
+                {ventasOrdenadas.map((v: any) => (
+                  <View
+                    key={v.id}
+                    style={[
+                      styles.ticket,
+                      styles.clientGridItem,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                        borderWidth: 1,
+                      },
+                    ]}
+                  >
+                    <ThemedText style={{ color: colors.text }}>
+                      {v.receipt_id}
+                    </ThemedText>
+
+                    <ThemedText style={{ color: colors.secondaryText }}>
+                      {formatFecha(v.created_at)}
+                    </ThemedText>
+
+                    <ThemedText style={{ color: colors.text }}>
+                      Método: {v.metodo_pago}
+                    </ThemedText>
+
+                    <ThemedText
+                      style={[
+                        styles.ticketTotal,
+                        { color: colors.price },
+                      ]}
+                    >
+                      Total: Bs. {Number(v.total).toFixed(2)}
+                    </ThemedText>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.btn,
+                        {
+                          backgroundColor: colors.primary,
+                          marginTop: 10,
+                        },
+                      ]}
+                      onPress={() => setReciboDetalle(v)}
+                    >
+                      <ThemedText style={{ color: colors.primaryText }}>
+                        Ver recibo
+                      </ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.btn,
+                        {
+                          backgroundColor: colors.actionSuccess,
+                          marginTop: 10,
+                        },
+                      ]}
+                      onPress={() =>
+                        imprimirRecibo({
+                          ...v,
+                          cliente: v.usuario_nombre,
+                          carnet: v.profiles?.carnet || 'N/A',
+                          metodoPago: v.metodo_pago,
+                          fecha: v.created_at,
+                        })
+                      }
+                    >
+                      <ThemedText style={{ color: colors.primaryText }}>
+                        Imprimir PDF
+                      </ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    </ScrollView>
+
+    {/* Footer fijo de pago */}
+    {items.length > 0 && (
+      <View
+        style={[
+          styles.footerPago,
+          {
+            backgroundColor: colors.footer,
+            borderTopColor: colors.border,
+          },
+        ]}
+      >
+        <ThemedText style={styles.total}>
+          TOTAL: Bs. {Number(total).toFixed(2)}
+        </ThemedText>
+
+        <TouchableOpacity
+          style={[
+            styles.btn,
+            {
+              backgroundColor: colors.primary,
+              marginTop: 60,
+              bottom: 50,
+            },
+          ]}
+          disabled={procesando}
+          onPress={() => confirmarCompra('Efectivo')}
+        >
+          <ThemedText style={{ color: colors.primaryText }}>
+            Comprar en efectivo
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.btn,
+            {
+              backgroundColor: colors.primary,
+              marginTop: 10,
+              bottom: 50,
+            },
+          ]}
+          onPress={() => setMostrarQR(true)}
+        >
+          <ThemedText style={{ color: colors.primaryText }}>
+            Pagar con QR
+          </ThemedText>
+        </TouchableOpacity>
+
+        {mostrarQR && (
+          <View style={styles.qrContainer}>
             <TouchableOpacity
               style={[
                 styles.btn,
                 {
-                  backgroundColor:'#22c55e',
-                    marginTop: 60,
-                    bottom: 50,
+                  backgroundColor: colors.actionSuccess,
+                  marginTop: 'auto',
                 },
               ]}
               disabled={procesando}
-              onPress={() => confirmarCompra('Efectivo')}
+              onPress={() => confirmarCompra('QR')}
             >
-              <ThemedText
-                style={{
-                  color: colors.text,
-                }}
-              >
-                Comprar en efectivo
+              <ThemedText style={{ color: colors.primaryText }}>
+                Confirmar pago QR
               </ThemedText>
             </TouchableOpacity>
+
+            <Image
+              source={qrImage}
+              style={styles.qrImage}
+              resizeMode="contain"
+            />
 
             <TouchableOpacity
               style={[
                 styles.btn,
                 {
-                  backgroundColor:'#2563eb',
-                  marginTop: 10,
-                  bottom: 50,
+                  backgroundColor: colors.danger,
+                  marginTop: -20,
                 },
               ]}
-              onPress={() =>
-                setMostrarQR(true)
-                
-              }
-              
+              onPress={() => setMostrarQR(false)}
             >
-
-              <ThemedText
-                style={{
-                  color: colors.text,
-                }}
-              >
-                Pagar con QR
+              <ThemedText style={{ color: colors.primaryText }}>
+                Cancelar
               </ThemedText>
             </TouchableOpacity>
-
-                          {mostrarQR && (
-  <View style={styles.qrContainer}>
-    
-        <TouchableOpacity
-      style={[
-        styles.btn,
-        {
-          backgroundColor: '#22c55e',
-          marginTop:'auto',
-        },
-      ]}
-      disabled={procesando}
-      onPress={() => confirmarCompra('QR')}
-    >
-      <ThemedText
-        style={{
-          color: colors.text,
-        }}
-      >
-        Confirmar pago QR
-      </ThemedText>
-    </TouchableOpacity>
-    <Image
-      source={qrImage}
-      style={styles.qrImage}
-      resizeMode="contain"
-    />
-
-<TouchableOpacity
-      style={[
-        styles.btn,
-        {
-          backgroundColor: '#ef4444',
-          marginTop: -20,
-        },
-      ]}
-      onPress={() =>
-        setMostrarQR(false)
-      }
-    >
-      <ThemedText
-        style={{
-          color: colors.text,
-        }}
-      >
-        Cancelar
-      </ThemedText>
-    </TouchableOpacity>
-
-  </View>
-)}
           </View>
         )}
-        
-{/* este es el historial de compras del cliente */}
-<View
-  style={{
-    marginTop: 0,
-    paddingBottom: 0,
-    bottom:-8,
-  }}
->
-  <TouchableOpacity
-    style={styles.accordionBtn}
-    onPress={() =>
-      setHistorialVisible(
-        !historialVisible
-      )
-    }
-  >
-    <ThemedText
-      style={styles.accordionText}
-    >
-      {historialVisible
-        ? '▼'
-        : '▶'} Mi historial de compras
-    </ThemedText>
-  </TouchableOpacity>
-
-  {historialVisible &&
-    ventasOrdenadas.map(
-      (v: any) => (
-        <View
-          key={v.id}
-          style={[styles.ticket,{backgroundColor:colors.card}]}
-        >
-          <ThemedText>
-            {v.receipt_id}
-          </ThemedText>
-
-          <ThemedText>
-            {formatFecha(
-              v.created_at
-            )}
-          </ThemedText>
-
-          <ThemedText>
-            Método:
-            {' '}
-            {v.metodo_pago}
-          </ThemedText>
-
-          <ThemedText
-            style={
-              styles.ticketTotal
-            }
-          >
-            Total:
-            {' '}
-           Bs. {Number(v.total).toFixed(2)}
-          </ThemedText>
-
-          <TouchableOpacity
-            style={[
-              styles.btn,
-              {
-                backgroundColor:
-                  '#2563eb',
-                marginTop: 10,
-              },
-            ]}
-            onPress={() =>
-              setReciboDetalle(v)
-            }
-          >
-            <ThemedText
-              style={{
-                color: colors.text,
-              }}
-            >
-              Ver recibo
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.btn,
-              {
-                backgroundColor:
-                  '#22c55e',
-                marginTop: 10,
-              },
-            ]}
-            onPress={() =>
-              imprimirRecibo({
-                ...v,
-                cliente:
-                  v.usuario_nombre,
-                carnet:
-                  v.profiles
-                    ?.carnet ||
-                  'N/A',
-                metodoPago:
-                  v.metodo_pago,
-                fecha:
-                  v.created_at,
-              })
-            }
-          >
-            <ThemedText
-              style={{
-                color: colors.text,
-              }}
-            >
-              Imprimir PDF
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-      )
+      </View>
     )}
-</View>
+  </>
+) : (
 
-      </>
-    ) : (
 //*esto nos genera una vista de los reportes de ventas en tablas todo el sistema de reporte se encuentra aqui
 
       <ScrollView
-        contentContainerStyle={{
-          padding: 12,
-        }}
-      >
+  style={[
+    {
+      flex: 1,
+      minHeight: 0,
+    },
+    Platform.OS === 'web' && ({
+      overflowY: 'auto',
+      touchAction: 'pan-y',
+      overscrollBehavior: 'contain',
+    } as any),
+  ]}
+  contentContainerStyle={{
+    padding: 12,
+    paddingBottom: items.length > 0 ? 320 : 30,
+    flexGrow: 1,
+  }}
+  showsVerticalScrollIndicator={true}
+>
         <View>
           <ThemedText
             style={styles.bigTitle}
@@ -1257,29 +1257,37 @@ return (
 
 <View style={styles.dashboardRow}>
 
-  <View style={[styles.dashboardCard,{backgroundColor: colors.card}]}>
-    <ThemedText style={styles.dashboardTitle}>
+  <View style={[styles.dashboardCard,{backgroundColor: colors.card,      borderColor: colors.border,
+      borderWidth: 1,}]}>
+    <ThemedText style={[styles.dashboardTitle,{ color: colors.secondaryText },]}>
       Ingresos Totales
     </ThemedText>
 
-    <ThemedText style={styles.dashboardAmount}>
+    <ThemedText style={[styles.dashboardAmount,{ color: colors.price },]}>
       Bs. {totalVentas.toFixed(2)}
     </ThemedText>
   </View>
 
-  <View style={[styles.dashboardCard,{backgroundColor: colors.card}]}>
-    <ThemedText style={styles.dashboardTitle}>
+  <View style={[styles.dashboardCard,{backgroundColor: colors.card,       borderColor: colors.border,
+      borderWidth: 1,}]}>
+    <ThemedText style={[styles.dashboardTitle,{ color: colors.secondaryText },]}>
       Ganancia Real
     </ThemedText>
 
-    <ThemedText style={styles.dashboardAmount}>
+    <ThemedText style={[styles.dashboardAmount,{ color: colors.profit},]}>
       Bs. {gananciaReal.toFixed(2)}
     </ThemedText>
   </View>
 
 </View>
 
-<View style={styles.chartContainer}>
+<View  style={[styles.chartContainer,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                },
+              ]}>
 
   <ThemedText
     style={styles.chartTitle}
@@ -1302,28 +1310,30 @@ return (
       yAxisSuffix=" Bs"
 
       chartConfig={{
-        backgroundColor:'#111827',
+  backgroundColor: colors.card,
+  backgroundGradientFrom: colors.card,
+  backgroundGradientTo: colors.background,
 
-        backgroundGradientFrom:'#111827',
+  decimalPlaces: 0,
 
-        backgroundGradientTo:'#1f2937',
+  color: (opacity = 1) =>
+    colorScheme === 'dark'
+      ? `rgba(74,222,128,${opacity})`
+      : `rgba(21,128,61,${opacity})`,
 
-        decimalPlaces: 0,
+  labelColor: (opacity = 1) =>
+    colorScheme === 'dark'
+      ? `rgba(248,250,252,${opacity})`
+      : `rgba(23,33,43,${opacity})`,
 
-        color: (
-          opacity = 1
-        ) =>
-          `rgba(34,197,94,${opacity})`,
+  propsForDots: {
+    r: '5',
+  },
 
-        labelColor: (
-          opacity = 1
-        ) =>
-          `rgba(255,255,255,${opacity})`,
-
-        propsForDots: {
-          r: '5',
-        },
-      }}
+  propsForBackgroundLines: {
+    stroke: colors.border,
+  },
+}}
 
       bezier
 
@@ -1344,18 +1354,32 @@ return (
 
   <TextInput
     placeholder="Buscar carnet"
-    placeholderTextColor="#aaa"
+    placeholderTextColor={colors.mutedText}
     value={buscarCarnet}
     onChangeText={setBuscarCarnet}
-    style={styles.searchInput}
+    style={[
+            styles.searchInput,
+            {
+              backgroundColor: colors.input,
+              borderColor: colors.border,
+              color: colors.text,
+            },
+          ]}
   />
 
   <TextInput
     placeholder="Buscar recibo"
-    placeholderTextColor="#aaa"
+    placeholderTextColor={colors.mutedText}
     value={buscarRecibo}
     onChangeText={setBuscarRecibo}
-    style={styles.searchInput}
+    style={[
+              styles.searchInput,
+              {
+                backgroundColor: colors.input,
+                borderColor: colors.border,
+                color: colors.text,
+              },
+            ]}
   />
 
 </View>
@@ -1425,7 +1449,10 @@ return (
 )}
 
 <TouchableOpacity
-  style={styles.accordionBtn}
+  style={[
+  styles.accordionBtn,
+  { backgroundColor: colors.tableHeader },
+]}
   onPress={() =>
     setHistorialVisible(
       !historialVisible
@@ -1446,7 +1473,7 @@ return (
 <View>
 
 {/* cabecera de la tabla de vista admin */}
-  <View style={styles.tableHeader}>
+  <View style={[styles.tableHeader,{ backgroundColor: colors.tableHeader },]}>
 
     <ThemedText style={styles.headerCell}>
       Cliente
@@ -1471,8 +1498,7 @@ return (
 
       <View
         key={v.id}
-        style={styles.tableRow}
-      >
+        style={[styles.tableRow,{ backgroundColor: colors.card },]}>
 
         <ThemedText
           style={styles.tableCell}
@@ -1495,14 +1521,14 @@ return (
         </ThemedText>
 
         <TouchableOpacity
-          style={styles.miniBtn}
+          style={[  styles.miniBtn,  { backgroundColor: colors.primary },]}
           onPress={() =>
             setReciboDetalle(v)
           }
         >
           <ThemedText
             style={{
-              color: colors.text,
+              color: colors.primaryText,
               fontSize: 12,
             }}
           >
@@ -1527,20 +1553,20 @@ return (
 
 //todo esto son los estilos del tab ventas
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 
   contentContainer: {
-  padding: 12,
-  paddingBottom: 140,
-  flexGrow: 1,
+    padding: 12,
+    paddingBottom: 140,
+    flexGrow: 1,
   },
 
   input: {
     borderWidth: 1,
-    borderColor: '#374151',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -1548,7 +1574,6 @@ const styles = StyleSheet.create({
 
   dateBtn: {
     borderWidth: 1,
-    borderColor: '#374151',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -1579,8 +1604,7 @@ const styles = StyleSheet.create({
 
   receiptItem: {
     flexDirection: 'row',
-    justifyContent:
-      'space-between',
+    justifyContent: 'space-between',
     marginVertical: 4,
   },
 
@@ -1601,163 +1625,167 @@ const styles = StyleSheet.create({
   },
 
   btnCantidad: {
-  backgroundColor: '#374151',
-  width: 35,
-  height: 35,
-  borderRadius: 8,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
+    width: 35,
+    height: 35,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-inputCantidad: {
-  borderWidth: 1,
-  borderColor: '#374151',
-  width: 60,
-  height: 40,
-  textAlign: 'center',
-  color: 'colors.text',
-  borderRadius: 8,
-},
-footerPago: {
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  padding: 15,
-  borderTopWidth: 1,
-},
-receiptCard: {
-  marginTop: 12,
-  padding: 10,
-  borderRadius: 10,
-  backgroundColor: 'colors.card',
-},
+  inputCantidad: {
+    borderWidth: 1,
+    width: 60,
+    height: 40,
+    textAlign: 'center',
+    borderRadius: 8,
+  },
 
-receiptProduct: {
-  fontWeight: '700',
-  fontSize: 16,
-  marginBottom: 8,
-},
+  footerPago: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 15,
+    borderTopWidth: 1,
+  },
 
-receiptRow: {
-  flexDirection: 'row',
-  justifyContent:
-    'space-between',
-  marginTop: 4,
+  receiptCard: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 10,
+  },
 
-  
-},
-dashboardCard: {
-  flex: 1,
-  padding: 20,
-  borderRadius: 14,
-},
-dashboardRow: {
-  flexDirection: 'row',
-  gap: 12,
-  marginBottom: 15,
-},
-searchRow: {
-  flexDirection: 'row',
-  gap: 12,
-  marginBottom: 10,
-},
+  receiptProduct: {
+    fontWeight: '700',
+    fontSize: 16,
+    marginBottom: 8,
+  },
 
-searchInput: {
-  flex: 1,
-  borderWidth: 1,
-  borderColor: '#374151',
-  padding: 10,
-  borderRadius: 8,
-  color: 'colors.text',
-},
+  receiptRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
 
-dashboardTitle: {
-  fontSize: 16,
-  color: '#9ca3af',
-},
+  dashboardCard: {
+    flex: 1,
+    padding: 20,
+    borderRadius: 14,
+  },
 
-dashboardAmount: {
-  fontSize: 30,
-  fontWeight: '800',
-  color: '#22c55e',
-  marginTop: 10,
-},
-tableHeader: {
-  flexDirection: 'row',
-  paddingVertical: 12,
-  borderRadius: 10,
-  marginBottom: 8,
-  backgroundColor: 'colors.tableHeader',
-},
+  dashboardRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 15,
+  },
 
-tableRow: {
-  flexDirection: 'row',
-  backgroundColor: 'colors.card',
-  paddingVertical: 10,
-  borderRadius: 10,
-  marginBottom: 6,
-  alignItems: 'center',
-},
+  searchRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 10,
+  },
 
-headerCell: {
-  flex: 1,
-  textAlign: 'center',
-  fontWeight: '800',
-},
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+  },
 
-tableCell: {
-  flex: 1,
-  textAlign: 'center',
-  fontSize: 12,
-  paddingHorizontal: 4,
-},
+  dashboardTitle: {
+    fontSize: 16,
+  },
 
-miniBtn: {
-  flex: 1,
-  backgroundColor: '#2563eb',
-  marginHorizontal: 4,
-  paddingVertical: 6,
-  borderRadius: 6,
-  alignItems: 'center',
-}, 
+  dashboardAmount: {
+    fontSize: 30,
+    fontWeight: '800',
+    marginTop: 10,
+  },
 
-chartContainer: {
-  backgroundColor: 'colors.card',
-  padding: 15,
-  borderRadius: 14,
-  marginBottom: 20,
-  alignItems: 'center',
-},
+  tableHeader: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
 
-chartTitle: {
-  fontSize: 16,
-  fontWeight: '700',
-  marginBottom: 10,
-},
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginBottom: 6,
+    alignItems: 'center',
+  },
 
-accordionBtn: {
-  backgroundColor: 'colors.tableHeader',
-  padding: 14,
-  borderRadius: 12,
-  marginBottom: 10,
-},
+  headerCell: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: '800',
+  },
 
-accordionText: {
-  fontSize: 16,
-  fontWeight: '700',
-},
-qrContainer: {
-  marginTop: 25,
-  alignItems: 'center',
-  bottom:60,
-},
+  tableCell: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    paddingHorizontal: 4,
+  },
 
-qrImage: {
-  width: 310,
-  height: 250,
-  borderRadius: 25,
-  marginTop: 40,
-  bottom:35,
-},
+  miniBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+
+  chartContainer: {
+    padding: 15,
+    borderRadius: 14,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+
+  accordionBtn: {
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+
+  accordionText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  qrContainer: {
+    marginTop: 25,
+    alignItems: 'center',
+    bottom: 60,
+  },
+
+  qrImage: {
+    width: 310,
+    height: 250,
+    borderRadius: 25,
+    marginTop: 40,
+    bottom: 35,
+  },
+   // Cuadrícula de dos columnas para la vista del cliente
+  clientGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
+  },
+
+  clientGridItem: {
+    width: '48%',
+    marginTop: 10,
+    padding: 10,
+  },
 });

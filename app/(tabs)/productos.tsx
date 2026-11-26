@@ -606,7 +606,7 @@ const confirmarEliminar = (
               }
             >
               <ThemedText
-                style={[styles.toggleText,{color:colors.text}]}
+                style={[styles.toggleText,{color: colors.actionText}]}
               >
                 {showForm
                   ? '➖ Ocultar formulario'
@@ -872,7 +872,7 @@ const confirmarEliminar = (
               <ThemedText
                 style={styles.gananciaVendida}
               >
-                Ganancia cantidad: Bs.{' '}
+                Ganancia total: Bs.{' '}
                 {
                   calcularGanancias(
                     producto

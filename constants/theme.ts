@@ -1,9 +1,10 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
 
 import { Platform } from 'react-native';
+
+// Paleta centralizada de Tienda Doña Judy.
+const BRAND_GREEN = '#15803D';
+const NAVY_BLUE = '#173B5E';
+const DANGER_RED = '#B91C1C';
 
 export const Colors = {
   light: {
@@ -22,10 +23,11 @@ export const Colors = {
     mutedText: '#64748B',
 
     // Marca y navegación
-    tint: '#15803D',
-    primary: '#1D4ED8',
+    tint: BRAND_GREEN,
+    primary: NAVY_BLUE,
     primaryText: '#FFFFFF',
     tabIconDefault: '#64748B',
+    icon: '#687076',
 
     // Bordes
     border: '#D8E0E8',
@@ -34,7 +36,7 @@ export const Colors = {
     success: '#166534',
     successBackground: '#DCFCE7',
 
-    danger: '#B91C1C',
+    danger: DANGER_RED,
     dangerBackground: '#FEE2E2',
 
     warning: '#92400E',
@@ -50,11 +52,10 @@ export const Colors = {
     stockLowBackground: '#FEF3C7',
 
     // Acciones
-    actionSuccess: '#15803D',
-actionDanger: '#B91C1C',
-actionInfo: '#1D4ED8',
+    actionSuccess: BRAND_GREEN,
+    actionDanger: DANGER_RED,
+    actionInfo: NAVY_BLUE,
     actionText: '#FFFFFF',
-    
   },
 
   dark: {
@@ -74,9 +75,10 @@ actionInfo: '#1D4ED8',
 
     // Marca y navegación
     tint: '#4ADE80',
-    primary: '#60A5FA',
-    primaryText: '#0F172A',
+    primary: NAVY_BLUE,
+    primaryText: '#FFFFFF',
     tabIconDefault: '#94A3B8',
+    icon: '#9BA1A6',
 
     // Bordes
     border: '#334155',
@@ -101,16 +103,16 @@ actionInfo: '#1D4ED8',
     stockLowBackground: '#451A03',
 
     // Acciones
-    actionSuccess: '#166534',
-    actionDanger: '#B91C1C',
-    actionInfo: '#1D4ED8',
+    actionSuccess: BRAND_GREEN,
+    actionDanger: DANGER_RED,
+    actionInfo: NAVY_BLUE,
     actionText: '#FFFFFF',
   },
 };
 
 export const AccentColors = {
-  success: '#15803D',
-  error: '#B91C1C',
+  success: BRAND_GREEN,
+  error: DANGER_RED,
   warning: '#92400E',
   info: '#1D4ED8',
 };

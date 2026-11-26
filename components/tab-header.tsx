@@ -39,7 +39,7 @@ export function TabHeader({ title }: { title: string }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.logoutButton, { backgroundColor: colors.tint, opacity: loading ? 0.6 : 1 }]}
+            style={[styles.logoutButton, { backgroundColor: colors.actionSuccess, opacity: loading ? 0.6 : 1 }]}
             onPress={handleLogout}
             disabled={loading}
           >
