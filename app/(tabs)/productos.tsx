@@ -2,7 +2,7 @@ import { ThemedView } from '@/components/themed-view';
 import { TabHeader } from '@/components/tab-header';
 import { ThemedText } from '@/components/themed-text';
 import * as ImagePicker from 'expo-image-picker';
-import {  ActivityIndicator,  StyleSheet,  ScrollView,  View,  TouchableOpacity,  TextInput,  Alert,  Image,} from 'react-native';
+import {  Modal,ActivityIndicator,  StyleSheet,  ScrollView,  View,  TouchableOpacity,  TextInput,  Alert,  Image,} from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/context/AuthContext';
@@ -535,528 +535,555 @@ const confirmarEliminar = (
     <ThemedView style={styles.container}>
       <TabHeader title="Productos" />
 
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
-      >
-        {/* label de buscar productos */}
-        <TextInput
-          placeholder="Buscar producto..."
-          placeholderTextColor={colors.mutedText          }
-          value={search}
-          onChangeText={setSearch}
-          style={[styles.input,{
-                color: colors.text,
-                borderColor: colors.border,
-                backgroundColor: colors.card ,
-              },
-            ]}
-        />
-
-        {/* botones de filtro cateoria */}
-        
-{/* BOTONES DE FILTRO DE CATEGORÍAS */}
-<ScrollView
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  style={styles.categoryScroll}
-  contentContainerStyle={styles.categoryScrollContent}
->
-  <TouchableOpacity
+<ScrollView contentContainerStyle={styles.contentContainer}>
+  {/* BUSCADOR DE PRODUCTOS */}
+  <TextInput
+    placeholder="Buscar producto..."
+    placeholderTextColor={colors.mutedText}
+    value={search}
+    onChangeText={setSearch}
     style={[
-      styles.catBtn,
-      !selectedCategory && {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
+      styles.input,
+      {
+        color: colors.text,
+        borderColor: colors.border,
+        backgroundColor: colors.card,
       },
     ]}
-    onPress={() => setSelectedCategory('')}
-    activeOpacity={0.7}
+  />
+
+  {/* FILTRO DE CATEGORÍAS */}
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    style={styles.categoryScroll}
+    contentContainerStyle={styles.categoryScrollContent}
   >
-    <ThemedText
+    <TouchableOpacity
       style={[
-        styles.toggleText,
-        {
-          color: !selectedCategory
-            ? colors.primaryText
-            : colors.text,
+        styles.catBtn,
+        !selectedCategory && {
+          backgroundColor: colors.primary,
+          borderColor: colors.primary,
         },
       ]}
+      onPress={() => setSelectedCategory('')}
+      activeOpacity={0.7}
     >
-      Todos
-    </ThemedText>
-  </TouchableOpacity>
-
-  {CATEGORIAS.map((cat) => {
-    const isSelected = selectedCategory === cat;
-
-    return (
-      <TouchableOpacity
-        key={cat}
+      <ThemedText
         style={[
-          styles.catBtn,
-          isSelected && {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
+          styles.toggleText,
+          {
+            color: !selectedCategory
+              ? colors.primaryText
+              : colors.text,
           },
         ]}
-        onPress={() => setSelectedCategory(cat)}
-        activeOpacity={0.7}
+      >
+        Todos
+      </ThemedText>
+    </TouchableOpacity>
+
+    {CATEGORIAS.map((cat) => {
+      const isSelected = selectedCategory === cat;
+
+      return (
+        <TouchableOpacity
+          key={cat}
+          style={[
+            styles.catBtn,
+            isSelected && {
+              backgroundColor: colors.primary,
+              borderColor: colors.primary,
+            },
+          ]}
+          onPress={() => setSelectedCategory(cat)}
+          activeOpacity={0.7}
+        >
+          <ThemedText
+            style={[
+              styles.toggleText,
+              {
+                color: isSelected
+                  ? colors.primaryText
+                  : colors.text,
+              },
+            ]}
+          >
+            {cat}
+          </ThemedText>
+        </TouchableOpacity>
+      );
+    })}
+  </ScrollView>
+
+  {/* FORMULARIO DE ADMINISTRADOR */}
+  {user?.role === 'admin' && (
+    <View style={styles.formContainer}>
+      <TouchableOpacity
+        style={[
+          styles.toggleBtn,
+          { backgroundColor: colors.primary },
+        ]}
+        onPress={() => setShowForm(!showForm)}
       >
         <ThemedText
           style={[
             styles.toggleText,
-            {
-              color: isSelected
-                ? colors.primaryText
-                : colors.text,
-            },
+            { color: colors.actionText },
           ]}
         >
-          {cat}
+          {showForm
+            ? '➖ Ocultar formulario'
+            : '➕ Agregar producto'}
         </ThemedText>
       </TouchableOpacity>
-    );
-  })}
-</ScrollView>
 
+      {showForm && (
+        <View
+          style={[
+            styles.form,
+            { backgroundColor: colors.card },
+          ]}
+        >
+          <TextInput
+            placeholder="Nombre producto"
+            placeholderTextColor={colors.mutedText}
+            value={nombre}
+            onChangeText={setNombre}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+          />
 
-        {/* vista de administrador en el tab productos */}
-        {user?.role === 'admin' && (
-          <View
-            style={styles.formContainer}
-          >
-            <TouchableOpacity
-              style={[styles.toggleBtn,{ backgroundColor: colors.primary },]}
-              onPress={() =>
-                setShowForm(!showForm)
-              }
-            >
-              <ThemedText
-                style={[styles.toggleText,{color: colors.actionText}]}
-              >
-                {showForm
-                  ? '➖ Ocultar formulario'
-                  : '➕ Agregar producto'}
-              </ThemedText>
-            </TouchableOpacity>
-
-            {showForm && (
-              <View  style={[styles.form,{
-                  backgroundColor: colors.card,
-                },
-              ]}>
-
-                <TextInput
-                  placeholder="Nombre producto"
-                  placeholderTextColor={colors.mutedText}
-                  value={nombre}
-                  onChangeText={setNombre}
-                   style={[styles.input,{
-                        color: colors.text,
-                        borderColor: colors.border,
-                        backgroundColor:colors.card,
-                        },
-                      ]}
-                />
-
-                <TextInput
-                  placeholder="Código automático"
-                  placeholderTextColor={colors.mutedText}
-                  value={codigoProducto}
-                  editable={false}
-                   style={[styles.input,{
-                      color: colors.text,
-                      borderColor: colors.border,
-                      backgroundColor:colors.card,
-                    },
-                  ]}
-                />
+          <TextInput
+            placeholder="Código automático"
+            placeholderTextColor={colors.mutedText}
+            value={codigoProducto}
+            editable={false}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+          />
 
           <TextInput
             placeholder="Marca"
             placeholderTextColor={colors.mutedText}
             value={marca}
             onChangeText={setMarca}
-            style={[styles.input,{
-              color: colors.text,
-              borderColor: colors.border,
-              backgroundColor:colors.card,
-            },
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
             ]}
-           />
+          />
 
           <TextInput
             placeholder="Unidad medida"
             placeholderTextColor={colors.mutedText}
             value={unidadMedida}
-            onChangeText={
-              setUnidadMedida
-            }
-            style={[styles.input,{
-              color: colors.text,
-              borderColor: colors.border,
-              backgroundColor:colors.card,
-            },
+            onChangeText={setUnidadMedida}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
             ]}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.addBtn,
+              { backgroundColor: colors.actionInfo },
+            ]}
+            onPress={seleccionarImagen}
+          >
+            <ThemedText style={{ color: colors.actionText }}>
+              Seleccionar imagen
+            </ThemedText>
+          </TouchableOpacity>
+
+          {imagen && (
+            <Image
+              source={{ uri: imagen }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 12,
+                alignSelf: 'center',
+                marginVertical: 10,
+              }}
             />
+          )}
 
-            <TouchableOpacity
-             style={[
-  styles.addBtn,
-  { backgroundColor: colors.actionInfo },
-]}
-              onPress={seleccionarImagen}
-            >
-              <ThemedText
-                style={{color: colors.actionText,}}
-              >
-                Seleccionar imagen
-              </ThemedText>
-            </TouchableOpacity>
-            { imagen && (
-                <Image
-                  source={{
-                    uri: imagen,
-                  }}
-                  style={{
-                    width: 120,
-                    height: 120,
-                    borderRadius: 12,
-                    alignSelf: 'center',
-                    marginVertical: 10,
-                  }}
-                />
-              )
-            }
-                <TextInput
-                  placeholder="Descripción"
-                  placeholderTextColor={colors.mutedText}
-                  value={descripcion}
-                  onChangeText={
-                    setDescripcion
-                  }
-                  style={[ styles.input, {
-                      height:90,
-                      color: colors.text,
-                      marginTop:8,
-                      borderColor: colors.border,
-                      backgroundColor:colors.card,
-                    },
-                  ]}
-                  multiline
-                />
+          <TextInput
+            placeholder="Descripción"
+            placeholderTextColor={colors.mutedText}
+            value={descripcion}
+            onChangeText={setDescripcion}
+            style={[
+              styles.input,
+              {
+                height: 90,
+                color: colors.text,
+                marginTop: 8,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+            multiline
+          />
 
-                <View style={styles.categorias}
-                >
-                  {CATEGORIAS.map(
-                    (cat) => (
-                      <TouchableOpacity
-                        key={cat}
-                        style={[
-                          styles.catBtn, categoria === cat && {backgroundColor:colors.border,
-                          },
-                        ]}
-                        onPress={() => setCategoria(cat)}
-                      >
-                        <ThemedText
-                          style={{color:colors.primaryText,}}
-                        >
-                          {cat}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    )
-                  )}
-                </View>
-
-                <TextInput
-                  placeholder="Precio compra"
-                  placeholderTextColor={colors.mutedText}
-                  value={precioCompra}
-                  onChangeText={
-                    setPrecioCompra
-                  }
-                   style={[styles.input, {
-                        color: colors.text,
-                        borderColor: colors.border,
-                        backgroundColor:colors.card,
-                      },
-                    ]}
-                  keyboardType="numeric"
-                />
-
-                <TextInput
-                  placeholder="Precio venta"
-                  placeholderTextColor={colors.mutedText}
-                  value={precioVenta}
-                  onChangeText={
-                    setPrecioVenta
-                  }
-                   style={[styles.input,{
-                        color: colors.text,
-                        borderColor: colors.border,
-                        backgroundColor:
-                          colors.card,
-                      },
-                    ]}
-                  keyboardType="numeric"
-                />
-
-                <TextInput
-                  placeholder="Cantidad"
-                  placeholderTextColor={colors.mutedText}
-                  value={stock}
-                  onChangeText={
-                    setStock
-                  }
-                   style={[styles.input,{
-                        color: colors.text,
-                        borderColor: colors.border,
-                        backgroundColor:colors.card,
-                      },
-                    ]}
-                  keyboardType="numeric"
-                />
-
-                <TouchableOpacity
+          <View style={styles.categorias}>
+            {CATEGORIAS.map((cat) => (
+              <TouchableOpacity
+                key={cat}
                 style={[
-  styles.addBtn,
-  { backgroundColor: colors.actionSuccess },
-]}
-                  disabled={guardando}
-                  onPress={handleAgregar}
-                >
-                  <ThemedText
-                    style={{ color: colors.actionText }}
-                  >
-                    {guardando ? 'Guardando...' : 'Guardar producto'}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            )}
+                  styles.catBtn,
+                  categoria === cat && {
+                    backgroundColor: colors.border,
+                  },
+                ]}
+                onPress={() => setCategoria(cat)}
+              >
+                <ThemedText style={{ color: colors.primaryText }}>
+                  {cat}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
           </View>
-        )}
 
-{/* lista de productos */}
+          <TextInput
+            placeholder="Precio compra"
+            placeholderTextColor={colors.mutedText}
+            value={precioCompra}
+            onChangeText={setPrecioCompra}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+            keyboardType="numeric"
+          />
+
+          <TextInput
+            placeholder="Precio venta"
+            placeholderTextColor={colors.mutedText}
+            value={precioVenta}
+            onChangeText={setPrecioVenta}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+            keyboardType="numeric"
+          />
+
+          <TextInput
+            placeholder="Cantidad"
+            placeholderTextColor={colors.mutedText}
+            value={stock}
+            onChangeText={setStock}
+            style={[
+              styles.input,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+              },
+            ]}
+            keyboardType="numeric"
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.addBtn,
+              { backgroundColor: colors.actionSuccess },
+            ]}
+            disabled={guardando}
+            onPress={handleAgregar}
+          >
+            <ThemedText style={{ color: colors.actionText }}>
+              {guardando ? 'Guardando...' : 'Guardar producto'}
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  )}
+
+  {/* LISTA DE PRODUCTOS */}
   {errorCarga && (
-    <TouchableOpacity onPress={recargarProductos} style={{ paddingVertical: 10 }}>
-      <ThemedText style={{ color: colors.danger }}>⚠️ {errorCarga} Toca para reintentar.</ThemedText>
+    <TouchableOpacity
+      onPress={recargarProductos}
+      style={{ paddingVertical: 10 }}
+    >
+      <ThemedText style={{ color: colors.danger }}>
+        ⚠️ {errorCarga} Toca para reintentar.
+      </ThemedText>
     </TouchableOpacity>
   )}
 
   {isLoading && productos.length === 0 && (
-    <ActivityIndicator size="large" color={colors.tint} style={{ marginVertical: 20 }} />
+    <ActivityIndicator
+      size="large"
+      color={colors.tint}
+      style={{ marginVertical: 20 }}
+    />
   )}
 
   {!isLoading && !errorCarga && productosFiltrados.length === 0 && (
-    <ThemedText style={{ textAlign: 'center', opacity: 0.7, marginVertical: 20 }}>
+    <ThemedText
+      style={{
+        textAlign: 'center',
+        opacity: 0.7,
+        marginVertical: 20,
+      }}
+    >
       No hay productos para mostrar.
     </ThemedText>
   )}
 
   <View style={styles.productGrid}>
-          {productosFiltrados.map(
-            (producto: any) => (
+    {productosFiltrados.map((producto: any) => (
+      <View
+        key={producto.id}
+        style={[
+          styles.productCard,
+          { backgroundColor: colors.card },
+        ]}
+      >
+        {producto.imagenUrl ? (
+  <View style={styles.productImageContainer}>
+    <Image
+      source={{ uri: producto.imagenUrl }}
+      style={styles.productImage}
+      resizeMode="contain"
+    />
+  </View>
+) : (
+  <View style={styles.productImageContainer}>
+    <ThemedText style={styles.noImageText}>
+      Sin imagen
+    </ThemedText>
+  </View>
+)}
 
-              <View
-                key={producto.id}
-                style={[styles.productCard,{backgroundColor:colors.card,},]}
+        <View style={{ flex: 1 }}>
+          <ThemedText style={styles.productName}>
+            {producto.nombre}
+          </ThemedText>
 
-              > {producto.imagenUrl && (
-                    <Image
-                      source={{
-                        uri:
-                          producto.imagenUrl,
-                      }}
-                      style={{
-                        width: '100%',
-                        height: 120,
-                        borderRadius: 12,
-                        marginBottom: 10,
-                      }}
-                      resizeMode="cover"
-                    />
-                  )
-                }
-                <View style={{ flex: 1 }}>
-                  <ThemedText
-                    style={styles.productName}>
-                    {producto.nombre} 
-                  </ThemedText> 
+          {user?.role === 'admin' && (
+            <View style={{ marginTop: 6 }}>
+              <ThemedText
+                style={[
+                  styles.ganancia,
+                  { color: colors.profit },
+                ]}
+              >
+                Ganancia/unidad: Bs.{' '}
+                {calcularGanancias(producto).gananciaUnidad.toFixed(2)}
+              </ThemedText>
 
-       {user?.role === 'admin' && (
-
-          <View style={{ marginTop: 6 }}>
-
-            <ThemedText
-               style={[styles.ganancia,{ color: colors.profit },]}
-            >
-              Ganancia/unidad: Bs.{' '}
-              {
-                calcularGanancias(
-                  producto
-                ).gananciaUnidad.toFixed(2)
-              }
-            </ThemedText>
+              <ThemedText style={styles.gananciaVendida}>
+                Ganancia total: Bs.{' '}
+                {calcularGanancias(producto).gananciaStock.toFixed(2)}
+              </ThemedText>
 
               <ThemedText
-                style={styles.gananciaVendida}
+                style={[
+                  styles.price,
+                  { color: colors.price },
+                ]}
               >
-                Ganancia total: Bs.{' '}
-                {
-                  calcularGanancias(
-                    producto
-                  ).gananciaStock.toFixed(2)
-                }
+                precio de Compra: Bs.{' '}
+                {Number(producto.precioCompra).toFixed(2)}
               </ThemedText>
-          
-                <ThemedText
-              style={[styles.price,{ color: colors.price },]}
-            >
-              precio de Compra: Bs.{' '}
-              {Number(producto.precioCompra).toFixed(2)}
-            </ThemedText>
-        </View>
-      )}
-
-                <ThemedText style={styles.price}>
-                   precio de venta Bs.{' '}
-                  {Number(producto.precioVenta).toFixed(2)}
-                </ThemedText>
-
-               <View
-                    style={{
-                      marginTop: 6,
-                      alignSelf: 'flex-start',
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderRadius: 6,
-                      backgroundColor:
-                        producto.stock <= 5
-                          ? colors.stockLowBackground
-                          : colors.tableHeader,
-                    }}
-                  >
-                  <ThemedText
-                    style={{
-                      fontSize: 13,
-                      fontWeight: producto.stock <= 5 ? '700' : '400',
-                      color:
-                        producto.stock <= 5
-                          ? colors.stockLow
-                          : colors.secondaryText,
-                    }}
-                  >
-                    Stock: {producto.stock}
-                    {producto.stock <= 10 ? ' · Stock bajo' : ''}
-                  </ThemedText>
-                </View>
-        </View>
-
-
-              {user?.role ===
-              'admin' ? (
-                <View style={{gap: 15,}} >
-                  <TouchableOpacity
-                    style={[
-                      styles.editBtn,
-                      { backgroundColor: colors.actionInfo },
-                    ]}
-                    onPress={() => handleEditar(producto)}
-                  >
-                    <ThemedText style={{ color: colors.actionText }}>
-                      Editar
-                    </ThemedText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.deleteBtn,
-                      { backgroundColor: colors.actionDanger },
-                    ]}
-                    onPress={() => confirmarEliminar(producto.id)}
-                  >
-                    <ThemedText style={{ color: colors.actionText }}>
-                      Eliminar
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-
-    <View
-      style={{gap: 8,}}
-    >
-      <TouchableOpacity
-        style={[
-  styles.viewBtn,
-  {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-]}
-        onPress={() =>verProducto(producto)}
-      >
-        <ThemedText
-          style={{color: colors.primaryText,}}
-        >
-          Ver producto
-        </ThemedText>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-  styles.addBtn,
-  { backgroundColor: colors.actionSuccess },
-]}
-        onPress={() => handleAgregarCarrito(producto)}
-      >
-        <ThemedText
-          style={{color: colors.primaryText,}}
-        >
-          Agregar
-        </ThemedText>
-      </TouchableOpacity>
-    </View>
-
-              )}
             </View>
-          )
+          )}
+
+          <ThemedText style={styles.price}>
+            precio de venta Bs.{' '}
+            {Number(producto.precioVenta).toFixed(2)}
+          </ThemedText>
+
+          <View
+            style={{
+              marginTop: 6,
+              alignSelf: 'flex-start',
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 6,
+              backgroundColor:
+                producto.stock <= 5
+                  ? colors.stockLowBackground
+                  : colors.tableHeader,
+            }}
+          >
+            <ThemedText
+              style={{
+                fontSize: 13,
+                fontWeight: producto.stock <= 5 ? '700' : '400',
+                color:
+                  producto.stock <= 5
+                    ? colors.stockLow
+                    : colors.secondaryText,
+              }}
+            >
+              Stock: {producto.stock}
+              {producto.stock <= 10 ? ' · Stock bajo' : ''}
+            </ThemedText>
+          </View>
+        </View>
+
+        {user?.role === 'admin' ? (
+          <View style={{ gap: 15 }}>
+            <TouchableOpacity
+              style={[
+                styles.editBtn,
+                { backgroundColor: colors.actionInfo },
+              ]}
+              onPress={() => handleEditar(producto)}
+            >
+              <ThemedText style={{ color: colors.actionText }}>
+                Editar
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.deleteBtn,
+                { backgroundColor: colors.actionDanger },
+              ]}
+              onPress={() => confirmarEliminar(producto.id)}
+            >
+              <ThemedText style={{ color: colors.actionText }}>
+                Eliminar
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={{ gap: 8 }}>
+            <TouchableOpacity
+              style={[
+                styles.viewBtn,
+                {
+                  backgroundColor: colors.primary,
+                  borderColor: colors.primary,
+                },
+              ]}
+              onPress={() => verProducto(producto)}
+            >
+              <ThemedText style={{ color: colors.primaryText }}>
+                Ver producto
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.addBtn,
+                { backgroundColor: colors.actionSuccess },
+              ]}
+              onPress={() => handleAgregarCarrito(producto)}
+            >
+              <ThemedText style={{ color: colors.primaryText }}>
+                Agregar
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
         )}
-</View>
-     
-      {editVisible && editProduct && (
+      </View>
+    ))}
+  </View>
+</ScrollView>
+
+{/* MODAL DE EDICIÓN */}
+<Modal
+  visible={editVisible && !!editProduct}
+  transparent={true}
+  animationType="fade"
+  statusBarTranslucent={true}
+  onRequestClose={() => setEditVisible(false)}
+>
   <View style={styles.modalOverlay}>
-    <View style={[styles.modalContent,{backgroundColor:colors.card}]}>
+    <View
+      style={[
+        styles.modalContent,
+        { backgroundColor: colors.card },
+      ]}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ThemedText style={styles.modalTitle}>
+          Editar producto
+        </ThemedText>
 
-      <ThemedText style={styles.modalTitle}>
-        Editar producto
-      </ThemedText>
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          nombre producto
+        </ThemedText>
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        nombre producto
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                color: colors.text,
-                borderColor: colors.border,
-                backgroundColor:colors.card,},
-               ]}
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editNombre}
           onChangeText={setEditNombre}
           placeholder="Nombre"
           placeholderTextColor={colors.mutedText}
         />
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        descripcion
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:
-                      colors.card,
-                  },
-                ]}
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          descripcion
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editDescripcion}
           onChangeText={setEditDescripcion}
           placeholder="Descripción"
@@ -1064,83 +1091,124 @@ const confirmarEliminar = (
           multiline
         />
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        categoria
-      </ThemedText>
-      <View style={styles.categorias}>
-        {CATEGORIAS.map((cat) => (
-          <TouchableOpacity
-            key={cat}
-            style={[
-              styles.catBtn,
-              editCategoria === cat && { backgroundColor: colors.border },
-            ]}
-            onPress={() => setEditCategoria(cat)}
-          >
-            <ThemedText style={{ color: colors.primaryText }}>{cat}</ThemedText>
-          </TouchableOpacity>
-        ))}
-      </View>
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          categoria
+        </ThemedText>
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        codigo producto
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card,
-                  },
-                ]}
-        value={editCodigo}
-        editable={false}
-        placeholder="Código"
-        placeholderTextColor={colors.mutedText}
-      />
+        <View style={styles.categorias}>
+          {CATEGORIAS.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[
+                styles.catBtn,
+                editCategoria === cat && {
+                  backgroundColor: colors.border,
+                },
+              ]}
+              onPress={() => setEditCategoria(cat)}
+            >
+              <ThemedText style={{ color: colors.primaryText }}>
+                {cat}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        Marca
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card,
-                  },
-                ]}
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          codigo producto
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
+          value={editCodigo}
+          editable={false}
+          placeholder="Código"
+          placeholderTextColor={colors.mutedText}
+        />
+
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          Marca
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editMarca}
           onChangeText={setEditMarca}
           placeholder="Marca"
           placeholderTextColor={colors.mutedText}
         />
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        unidad de medida
-      </ThemedText>
-      <TextInput
-         style={[styles.input,
-                  {
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card,
-                  },
-                ]}
-            value={editUnidadMedida}
-            onChangeText={setEditUnidadMedida}
-            placeholder="Unidad de medida"
-            placeholderTextColor={colors.mutedText}
-          />
 
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          unidad de medida
+        </ThemedText>
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        precio de Compra
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card,
-                  },
-                ]}
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
+          value={editUnidadMedida}
+          onChangeText={setEditUnidadMedida}
+          placeholder="Unidad de medida"
+          placeholderTextColor={colors.mutedText}
+        />
+
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          precio de Compra
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editCompra}
           onChangeText={setEditCompra}
           keyboardType="numeric"
@@ -1148,16 +1216,24 @@ const confirmarEliminar = (
           placeholderTextColor={colors.mutedText}
         />
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        precio de venta
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card,
-                  },
-                ]}
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          precio de venta
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editVenta}
           onChangeText={setEditVenta}
           keyboardType="numeric"
@@ -1165,16 +1241,24 @@ const confirmarEliminar = (
           placeholderTextColor={colors.mutedText}
         />
 
-      <ThemedText style={[styles.toggleText,{color:colors.primaryText}]}>
-        cantidad disponible
-      </ThemedText>
-      <TextInput
-         style={[styles.input,{
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor:colors.card ,
-                  },
-                ]}
+        <ThemedText
+          style={[
+            styles.toggleText,
+            { color: colors.primaryText },
+          ]}
+        >
+          cantidad disponible
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            },
+          ]}
           value={editStock}
           onChangeText={setEditStock}
           keyboardType="numeric"
@@ -1182,103 +1266,137 @@ const confirmarEliminar = (
           placeholderTextColor={colors.mutedText}
         />
 
-      <View style={styles.modalButtons}>
-
-        <TouchableOpacity
-          style={[
-            styles.saveBtn,
-            { backgroundColor: colors.actionSuccess },
-          ]}
-          onPress={guardarEdicion}
-        >
-          <ThemedText style={{ color: colors.actionText }}>
-            Guardar
-          </ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.cancelBtn,{backgroundColor:colors.actionDanger},]}
-          onPress={() =>setEditVisible(false)}
-        >
-          <ThemedText
-            style={{ color: colors.primaryText }}
+        <View style={styles.modalButtons}>
+          <TouchableOpacity
+            style={[
+              styles.saveBtn,
+              { backgroundColor: colors.actionSuccess },
+            ]}
+            onPress={guardarEdicion}
           >
-            Cancelar
-          </ThemedText>
-        </TouchableOpacity>
+            <ThemedText style={{ color: colors.actionText }}>
+              Guardar
+            </ThemedText>
+          </TouchableOpacity>
 
-      </View>
-
+          <TouchableOpacity
+            style={[
+              styles.cancelBtn,
+              { backgroundColor: colors.actionDanger },
+            ]}
+            onPress={() => setEditVisible(false)}
+          >
+            <ThemedText style={{ color: colors.primaryText }}>
+              Cancelar
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   </View>
-)}
+</Modal>
 
-
-    {detalleVisible && productoDetalle && (
-    <View style={styles.modalOverlay}
+{/* MODAL DE DETALLE DEL PRODUCTO */}
+<Modal
+  visible={detalleVisible && !!productoDetalle}
+  transparent={true}
+  animationType="fade"
+  statusBarTranslucent={true}
+  onRequestClose={() => setDetalleVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View
+      style={[
+        styles.modalContent,
+        { backgroundColor: colors.card },
+      ]}
     >
-      <View
-        style={[styles.modalContent,{backgroundColor:colors.card}]}>
-        <ThemedText style={styles.modalTitle}
-        >
+      <ScrollView
+        showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ThemedText style={styles.modalTitle}>
           Información del producto
         </ThemedText>
 
-        {productoDetalle.imagenUrl && (
-          <Image
-            source={{
-              uri:productoDetalle.imagenUrl,
-            }}
-            style={{
-              width: '100%',
-              height: 220,
-              borderRadius: 12,
-              marginBottom: 15,
-            }}
-            resizeMode="cover"
-          />
-        )}
+        {productoDetalle?.imagenUrl ? (
+  <View style={styles.detailImageContainer}>
+    <Image
+      source={{ uri: productoDetalle.imagenUrl }}
+      style={styles.detailProductImage}
+      resizeMode="contain"
+    />
+  </View>
+) : null}
 
         <ThemedText style={styles.productName}>
-          { productoDetalle.nombre }
+          {productoDetalle?.nombre}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText, },]}>
-          Categoría:{' '}
-          {productoDetalle.categoria}
+        <ThemedText
+          style={[
+            styles.productInfo,
+            { color: colors.secondaryText },
+          ]}
+        >
+          Categoría: {productoDetalle?.categoria}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText, },]}>
-          Marca:{' '}
-          {productoDetalle.marca ||'Sin marca'}
+        <ThemedText
+          style={[
+            styles.productInfo,
+            { color: colors.secondaryText },
+          ]}
+        >
+          Marca: {productoDetalle?.marca || 'Sin marca'}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText, },]}>
-          Unidad:{' '}
-          {productoDetalle.unidadMedida}
+        <ThemedText
+          style={[
+            styles.productInfo,
+            { color: colors.secondaryText },
+          ]}
+        >
+          Unidad: {productoDetalle?.unidadMedida}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText, },]} >
-          codigo producto:{' '}
-          { productoDetalle.codigoProducto }
+        <ThemedText
+          style={[
+            styles.productInfo,
+            { color: colors.secondaryText },
+          ]}
+        >
+          codigo producto: {productoDetalle?.codigoProducto}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText, },]} >
-          cantidad disponible:{' '}
-          { productoDetalle.stock }
+        <ThemedText
+          style={[
+            styles.productInfo,
+            { color: colors.secondaryText },
+          ]}
+        >
+          cantidad disponible: {productoDetalle?.stock}
         </ThemedText>
 
-        <ThemedText style={[styles.productInfo,{color: colors.secondaryText,marginTop:10 },]}>
+        <ThemedText
+          style={[
+            styles.productInfo,
+            {
+              color: colors.secondaryText,
+              marginTop: 10,
+            },
+          ]}
+        >
           Descripción:
         </ThemedText>
 
         <ThemedText style={styles.productInfo}>
-          {productoDetalle.descripcion ||'Sin descripción'}
+          {productoDetalle?.descripcion || 'Sin descripción'}
         </ThemedText>
 
         <ThemedText style={styles.price}>
           Bs.{' '}
-          {Number(productoDetalle.precioVenta).toFixed(2)}
+          {Number(productoDetalle?.precioVenta ?? 0).toFixed(2)}
         </ThemedText>
 
         <View
@@ -1289,42 +1407,43 @@ const confirmarEliminar = (
           }}
         >
           <TouchableOpacity
-style={[
-  styles.addBtn,
-  { backgroundColor: colors.actionSuccess },
-]}
+            style={[
+              styles.addBtn,
+              { backgroundColor: colors.actionSuccess },
+            ]}
             onPress={() => {
-              if (handleAgregarCarrito(productoDetalle)) setDetalleVisible(false);
+              if (
+                productoDetalle &&
+                handleAgregarCarrito(productoDetalle)
+              ) {
+                setDetalleVisible(false);
+              }
             }}
           >
-            <ThemedText style={{color: colors.primaryText,}}>
+            <ThemedText style={{ color: colors.primaryText }}>
               Agregar al carrito
             </ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
-  styles.cancelBtn,
-  {
-    backgroundColor: colors.actionDanger,
-    borderColor: colors.actionDanger,
-  },
-]}
-            onPress={() =>setDetalleVisible(false)}
+              styles.cancelBtn,
+              {
+                backgroundColor: colors.actionDanger,
+                borderColor: colors.actionDanger,
+              },
+            ]}
+            onPress={() => setDetalleVisible(false)}
           >
-            <ThemedText
-              style={{
-                color: colors.primaryText,
-              }}
-            >
+            <ThemedText style={{ color: colors.primaryText }}>
               Cerrar
             </ThemedText>
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
-)}
       </ScrollView>
+    </View>
+  </View>
+</Modal>
     </ThemedView>
   );
 }
@@ -1480,19 +1599,14 @@ catBtn: {
   },
 
   // MODALES
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 999,
-    elevation: 10,
-    paddingHorizontal: 15,
-  },
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 15,
+  paddingVertical: 20,
+},
 
   modalContent: {
     width: '100%',
@@ -1568,4 +1682,46 @@ catBtn: {
     minHeight: 40,
     borderWidth: 1,
   },
+  // CONTENEDOR DE IMÁGENES DE PRODUCTOS
+productImageContainer: {
+  width: '100%',
+  height: 140,
+  borderRadius: 12,
+  backgroundColor: '#F3F4F6',
+  overflow: 'hidden',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 6,
+  marginBottom: 10,
+},
+
+// IMAGEN DEL PRODUCTO
+productImage: {
+  width: '100%',
+  height: '100%',
+},
+
+// TEXTO CUANDO NO EXISTE IMAGEN
+noImageText: {
+  color: '#9CA3AF',
+  fontSize: 13,
+  textAlign: 'center',
+},
+
+detailImageContainer: {
+  width: '100%',
+  height: 220,
+  borderRadius: 12,
+  backgroundColor: '#F3F4F6',
+  overflow: 'hidden',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 8,
+  marginBottom: 15,
+},
+
+detailProductImage: {
+  width: '100%',
+  height: '100%',
+},
 });
