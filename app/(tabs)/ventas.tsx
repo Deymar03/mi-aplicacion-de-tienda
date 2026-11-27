@@ -554,10 +554,7 @@ if (reciboDetalle) {
 
                   <ThemedText>
                     Bs.
-                    {
-                      item.producto
-                        .precioVenta
-                    }
+                   {Number(item.producto.precioVenta).toFixed(2)}
                   </ThemedText>
                 </View>
 
@@ -572,9 +569,7 @@ if (reciboDetalle) {
 
                   <ThemedText>
                     Bs.
-                    {item.cantidad *
-                      item.producto
-                        .precioVenta}
+                   {(item.cantidad * Number(item.producto.precioVenta)).toFixed(2)}
                   </ThemedText>
                 </View>
               </View>
